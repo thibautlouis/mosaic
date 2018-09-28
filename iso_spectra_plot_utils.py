@@ -87,7 +87,10 @@ def plot_cl_dict(plotDir,patchName,fName,type,lb,dictList,dictNames,fields,theor
                 plt.errorbar(lb,dict[l1]*fb,std[l1]*fb,fmt='o',label='%s'%name)
         else:
             for dict,name in zip(dictList,dictNames):
-                plt.errorbar(lb,dict[l1]*fb,fmt='o',label='%s'%name)
+                if name=='namaster':
+                    plt.errorbar(lb,dict[l1]*fb,fmt='-',label='%s'%name)
+                else:
+                    plt.errorbar(lb,dict[l1]*fb,fmt='o',label='%s'%name)
 
         plt.ylabel(r'$D^{%s}_{\ell}$'%l1,fontsize=18)
         if count==1:
@@ -160,7 +163,9 @@ def plot_all_spectra(mcmDir,specDir,plotDir,winList,nSplits,hdf5,type,theoryFile
                             lb, cbList, dictNamesList,stdList= increment_dict_list(specDir,fName,'mosaic',cbList, dictNamesList ,stdList)
 
                             if compare_mosaic_namaster:
-                                lb, cbList, dictNamesList,stdList=increment_dict_list(specDir+'_namaster',fName,'namaster',cbList, dictNamesList ,stdList)
+                                id= specDir[-4:]
+                                naMasterSpecDir=specDir[:-4]+'_namaster'+id
+                                lb, cbList, dictNamesList,stdList=increment_dict_list(naMasterSpecDir,fName,'namaster',cbList, dictNamesList ,stdList)
 
                             plot_cl_dict(plotDir,patchName,fName,type,lb,cbList,dictNamesList,fields,theoryFile,lmax,stdList=stdList,Bblfile=None,semilog_T=True,semilog_pol=True)
           

@@ -1,13 +1,13 @@
 ! FFLAGS="-fopenmp -fPIC -Ofast -ffree-line-length-none" f2py-2.7 -c -m mcm_code_full mcm_code_full.f90 wigner3j_sub.f -lgomp
 ! scinet: FFLAGS="-openmp -Ofast -fPIC -xhost" f2py --fcompiler=intelem --noopt -c -m mcm_code_full TS_mcm_code_full.f90 wigner3j_sub.f -liomp5
 
-subroutine calc_mcm(cl,cl_cross,cl_pol,wl_TT,wl_TP,wl_PP, mcm, mcm_p, mcm_pp, mcm_mm)
+subroutine calc_mcm(cl,cl_TP,cl_PT,cl_pol,wl_TT,wl_TP,wl_PT,wl_PP, mcm, mcm_Tp, mcm_pT, mcm_pp, mcm_mm)
     implicit none
-    real(8), intent(in)    :: cl(:),cl_cross(:),cl_pol(:),wl_TT(:),wl_TP(:),wl_PP(:)
-    real(8), intent(inout) :: mcm(:,:),mcm_p(:,:),mcm_pp(:,:),mcm_mm(:,:)
+real(8), intent(in)    :: cl(:),cl_TP(:),cl_PT(:),cl_pol(:),wl_TT(:),wl_TP(:),wl_PT(:),wl_PP(:)
+    real(8), intent(inout) :: mcm(:,:),mcm_Tp(:,:),mcm_pT(:,:),mcm_pp(:,:),mcm_mm(:,:)
     real(8), parameter     :: pi = 3.14159265358979323846264d0
     integer :: l1, l2, l3, info, nlmax, lmin, lmax, i
-    real(8) :: l1f(2), fac_TT,fac_TP,fac_PP
+    real(8) :: l1f(2), fac_TT,fac_TP,fac_PT,fac_PP
     real(8) :: thrcof0(2*size(mcm,1)),thrcof1(2*size(mcm,1))     
     nlmax = size(mcm,1)-1
 
@@ -16,11 +16,12 @@ subroutine calc_mcm(cl,cl_cross,cl_pol,wl_TT,wl_TP,wl_PP, mcm, mcm_p, mcm_pp, mc
     ! mcm(l2=2,l3=2)=mcm(1,1)
     ! l1 run in all the non zero wigner 3j it can start at 0 so cl(l=n)=cl(n+1) so cl(l=0)=cl(1)
 
-    !$omp parallel do private(l3,l2,l1,fac_TT,fac_TP,fac_PP,info,l1f,thrcof0,thrcof1,lmin,lmax,i) schedule(dynamic)
+    !$omp parallel do private(l3,l2,l1,fac_TT,fac_TP,fac_PT,fac_PP,info,l1f,thrcof0,thrcof1,lmin,lmax,i) schedule(dynamic)
     do l1 = 2, nlmax
         write(*,*) l1
         fac_TT=(2*l1+1)/(4*pi)*wl_TT(l1+1)
         fac_TP=(2*l1+1)/(4*pi)*wl_TP(l1+1)
+        fac_PT=(2*l1+1)/(4*pi)*wl_PT(l1+1)
         fac_PP=(2*l1+1)/(4*pi)*wl_PP(l1+1)
 
         do l2 = 2, nlmax
@@ -34,7 +35,8 @@ subroutine calc_mcm(cl,cl_cross,cl_pol,wl_TT,wl_TP,wl_PP, mcm, mcm_p, mcm_pp, mc
             do l3=lmin,lmax
                 i   = l3-lmin+1
                 mcm(l1-1,l2-1) =mcm(l1-1,l2-1)+ fac_TT*(cl(l3+1)*thrcof0(i)**2d0)
-                mcm_p(l1-1,l2-1) =mcm_p(l1-1,l2-1)+ fac_TP*(cl_cross(l3+1)*thrcof0(i)*thrcof1(i))
+                mcm_Tp(l1-1,l2-1) =mcm_Tp(l1-1,l2-1)+ fac_TP*(cl_TP(l3+1)*thrcof0(i)*thrcof1(i))
+                mcm_pT(l1-1,l2-1) =mcm_pT(l1-1,l2-1)+ fac_PT*(cl_PT(l3+1)*thrcof0(i)*thrcof1(i))
                 mcm_pp(l1-1,l2-1) =mcm_pp(l1-1,l2-1)+ fac_PP*(cl_pol(l3+1)*thrcof1(i)**2*(1+(-1)**(l1+l2+l3))/2)
                 mcm_mm(l1-1,l2-1) =mcm_mm(l1-1,l2-1)+ fac_PP*(cl_pol(l3+1)*thrcof1(i)**2*(1-(-1)**(l1+l2+l3))/2)
     

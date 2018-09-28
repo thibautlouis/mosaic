@@ -68,13 +68,7 @@ def get_spectra(mapDir,auxDir,mcmDir,specDir,winList,nSplits,lmax,binningFile,ty
                 for f2 in freq[i]:
                     if count2>count1:
                         continue
-                    if f1==f2:
-                        mcm=np.loadtxt('%s/mode_coupling_%03d_%sGHzx%sGHz_%s.dat'%(mcmDir,i,f1,f2,'normal'))
-                        mcmlist=(mcm,mcm)
-                    else:
-                        mcm1=np.loadtxt('%s/mode_coupling_%03d_%sGHzx%sGHz_%s.dat'%(mcmDir,i,f1,f2,'normal'))
-                        mcm2=np.loadtxt('%s/mode_coupling_%03d_%sGHzx%sGHz_%s.dat'%(mcmDir,i,f1,f2,'reverse'))
-                        mcmlist=(mcm1,mcm2)
+                    mcm=np.loadtxt('%s/mode_coupling_%03d_%sGHzx%sGHz.dat'%(mcmDir,i,f1,f2))
 
                     dict_list_auto=[]
                     dict_list_cross=[]
@@ -90,7 +84,7 @@ def get_spectra(mapDir,auxDir,mcmDir,specDir,winList,nSplits,lmax,binningFile,ty
                             l,cl_dict=iso_ps_utils.get_cl_dict(alms[f1,s1],alms[f2,s2])
                             lb,cb_dict=iso_ps_utils.bin_cl_dict(l,cl_dict,binningFile,lmax,type=type)
 
-                            cb_dict=iso_ps_utils.apply_mcm(cb_dict,mcmlist,direct_invert=True)
+                            cb_dict=iso_ps_utils.apply_mcm(cb_dict,mcm,direct_invert=True)
                         
                             fName='%s_%sGHzx%sGHz_split%dxsplit%d_binned'%(type,f1,f2,s1,s2)
                             iso_ps_utils.write_cl_dict(specDir,patch_name,fName,lb,cb_dict,hdf5,file)
@@ -223,7 +217,7 @@ def get_spectra_namaster(p,mapDir,auxDir,mcmDir,specDir,winList,nSplits,lmax,typ
                             cb_dict['BE']=spin2[2]
                             cb_dict['BB']=spin2[3]
 
-                            fName='%s_%03d_%sGHzx%sGHz_split%dxsplit%d_binned.dat'%(type,i,f1,f2,s1,s2)
+                            fName='%s_%sGHzx%sGHz_split%dxsplit%d_binned'%(type,f1,f2,s1,s2)
                             spec_list.write('%s \n'%fName)
 
                             iso_ps_utils.write_cl_dict(specDir,patch_name,fName,lb,cb_dict)

@@ -18,23 +18,16 @@ def read_binning_file(file,lmax):
 
 def get_window_beam_array(p,f1,f2,lmax):
     W={}
-    if f1==f2:
-        ell,fell_T=np.loadtxt(p['beam_%s_T'%f1],unpack=True)
-        ell,fell_Pol=np.loadtxt(p['beam_%s_Pol'%f1],unpack=True)
-        ell,fell_T,fell_Pol= ell[:lmax],fell_T[:lmax],fell_Pol[:lmax]
-        W['TT']=fell_T**2
-        W['TP']=fell_T*fell_Pol
-        W['PP']=fell_Pol**2
-    else:
-        ell,fell_T_1=np.loadtxt(p['beam_%s_T'%f1],unpack=True)
-        ell,fell_Pol_1=np.loadtxt(p['beam_%s_Pol'%f1],unpack=True)
-        ell,fell_T_2=np.loadtxt(p['beam_%s_T'%f2],unpack=True)
-        ell,fell_Pol_2=np.loadtxt(p['beam_%s_Pol'%f2],unpack=True)
-        ell,fell_T_1,fell_Pol_1,fell_T_2,fell_Pol_2= ell[:lmax],fell_T_1[:lmax],fell_Pol_1[:lmax],fell_T_2[:lmax],fell_Pol_2[:lmax]
-        W['TT']=fell_T_1*fell_T_2
-        W['TP']=fell_T_1*fell_Pol_2
-        W['PT']=fell_T_2*fell_Pol_1
-        W['PP']=fell_Pol_1*fell_Pol_2
+    ell,fell_T_1=np.loadtxt(p['beam_%s_T'%f1],unpack=True)
+    ell,fell_Pol_1=np.loadtxt(p['beam_%s_Pol'%f1],unpack=True)
+    ell,fell_T_2=np.loadtxt(p['beam_%s_T'%f2],unpack=True)
+    ell,fell_Pol_2=np.loadtxt(p['beam_%s_Pol'%f2],unpack=True)
+    ell,fell_T_1,fell_Pol_1,fell_T_2,fell_Pol_2= ell[:lmax],fell_T_1[:lmax],fell_Pol_1[:lmax],fell_T_2[:lmax],fell_Pol_2[:lmax]
+    W['TT']=fell_T_1*fell_T_2
+    W['TP']=fell_T_1*fell_Pol_2
+    W['PT']=fell_T_2*fell_Pol_1
+    W['PP']=fell_Pol_1*fell_Pol_2
+    
     return( ell,W )
 
 def map2alm(map,pixel,lmax=None):
@@ -137,32 +130,31 @@ def bin_cl_dict(l,cl_dict,binningfile,lmax,type):
 def mcm_inv_mult(mcm_array,vec,direct_invert=True):
     nb_all=len(vec)
     new_vec=np.zeros(nb_all)
-    nb=nb_all/6
+    nb=nb_all/9
     if direct_invert==True:
         vec[:nb]=np.dot(np.linalg.inv(mcm_array[:nb,:nb]),vec[:nb])
-        vec[nb:3*nb]=np.dot(np.linalg.inv(mcm_array[nb:3*nb,nb:3*nb]),vec[nb:3*nb])
-        vec[3*nb:6*nb]=np.dot(np.linalg.inv(mcm_array[3*nb:6*nb,3*nb:6*nb]),vec[3*nb:6*nb])
+        vec[nb:5*nb]=np.dot(np.linalg.inv(mcm_array[nb:5*nb,nb:5*nb]),vec[nb:5*nb])
+        vec[5*nb:9*nb]=np.dot(np.linalg.inv(mcm_array[5*nb:9*nb,5*nb:9*nb]),vec[5*nb:9*nb])
     else:
         vec[:nb]=np.linalg.solve(mcm_array[:nb,:nb], vec[:nb])
-        vec[nb:3*nb]=np.linalg.solve(mcm_array[nb:3*nb,nb:3*nb], vec[nb:3*nb])
-        vec[3*nb:6*nb]=np.linalg.solve(mcm_array[3*nb:6*nb,3*nb:6*nb], vec[3*nb:6*nb])
+        vec[nb:5*nb]=np.linalg.solve(mcm_array[nb:5*nb,nb:5*nb], vec[nb:5*nb])
+        vec[5*nb:9*nb]=np.linalg.solve(mcm_array[5*nb:9*nb,5*nb:9*nb], vec[5*nb:9*nb])
     return vec
 
 
-def apply_mcm(cb_dict,mcmlist,direct_invert=False):
+def apply_mcm(cb_dict,mcm,direct_invert=False):
     new_cb_dict={}
     nBins=len(cb_dict['TT'])
-    fields=[['TT','TE','TB','EE','EB','BB'],['TT','ET','BT','EE','BE','BB']]
-    for i in range(2):
-        vec=[]
-        for l1 in fields[i]:
-            vec=np.append(vec,cb_dict[l1])
+    fields=['TT','TE','TB','ET','BT','EE','EB','BE','BB']
+    vec=[]
+    for l1 in fields:
+        vec=np.append(vec,cb_dict[l1])
         
-        vec=mcm_inv_mult(mcmlist[i],vec,direct_invert=False)
-        count=0
-        for l1 in fields[i]:
-            new_cb_dict[l1]=vec[count*nBins:(count+1)*nBins]
-            count+=1
+    vec=mcm_inv_mult(mcm,vec,direct_invert=False)
+    count=0
+    for l1 in fields:
+        new_cb_dict[l1]=vec[count*nBins:(count+1)*nBins]
+        count+=1
     return(new_cb_dict)
 
 def get_cl_array(lb,cb_dict):

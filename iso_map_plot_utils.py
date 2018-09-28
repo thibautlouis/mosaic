@@ -156,11 +156,12 @@ def plot_all_windows(auxDir,plotDir,pixel,winList,tessel_healpix=None):
             window_T=  iso_map_utils.read_map(auxDir,winName_T+'.fits',pixel)
             window_pol=  iso_map_utils.read_map(auxDir,winName_pol+'.fits',pixel)
             
+            gnomview_coord=None
             if tessel_healpix['apply']:
                 gnomview_coord=[long_c[i],lat_c[i],radius]
 
-            plot_maps(window_T,pixel, png_file=plotDir+winName_T,gnomview_coord=gnomview_coord)
-            plot_maps(window_pol,pixel, png_file=plotDir+winName_pol,gnomview_coord=gnomview_coord)
+            plot_maps(window_T,pixel, png_file=plotDir+'/'+winName_T,gnomview_coord=gnomview_coord)
+            plot_maps(window_pol,pixel, png_file=plotDir+'/'+winName_pol,gnomview_coord=gnomview_coord)
 
 def plot_all_maps(auxDir,mapDir,plotDir,pixel,winList,nSplits,color_range=None,survey_mask_coordinates=None,tessel_healpix=None):
     
@@ -190,9 +191,10 @@ def plot_all_maps(auxDir,mapDir,plotDir,pixel,winList,nSplits,color_range=None,s
                     maps=iso_map_utils.cut_patch_car(maps,ra0[i],ra1[i],dec0[i],dec1[i])
                 for ii in range(3):
                     maps[ii]*=window[ii]
+                gnomview_coord=None
                 if tessel_healpix['apply']:
                     gnomview_coord=[long_c[i],lat_c[i],radius]
-                plot_maps(maps,pixel,mask=0,color='planck',color_range=color_range,png_file=plotDir+fName+'_%03d'%i,gnomview_coord=gnomview_coord)
+                plot_maps(maps,pixel,mask=0,color='planck',color_range=color_range,png_file=plotDir+'/'+fName+'_%03d'%i,gnomview_coord=gnomview_coord)
 
 def plot_survey_map(p,auxDir,mapDir,plotDir,pixel,winList,color_range=None,survey_mask_coordinates=None,tessel_healpix=None):
     if pixel=='car':
@@ -234,4 +236,4 @@ def plot_survey_map(p,auxDir,mapDir,plotDir,pixel,winList,color_range=None,surve
                     template[disk2]+=1
                     id=np.where(template==1)
                     T[id]=np.nan
-                    plot_maps(T,pixel,png_file=plotDir+'im_%03d_%s.png'%(i,f1))
+                    plot_maps(T,pixel,png_file=plotDir+'/im_%03d_%s.png'%(i,f1))

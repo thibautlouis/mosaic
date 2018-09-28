@@ -25,6 +25,7 @@ survey_mask_coordinates=p['survey_mask_coordinate']
 tessel_healpix=p['tessel_healpix']
 freqTags=p['freqTags']
 removeMean=p['removeMean']
+compareMosaicNaMaster=p['compareMosaicNaMaster']
 
 mapDir= 'maps_%s/'%pixel
 auxDir = 'auxMaps_%s/'%pixel
@@ -37,10 +38,10 @@ if naMaster==True:
     specDir +='_namaster'
     mcDir+='_namaster'
     plotDir+='_namaster'
-if removeMean==False:
-    specDir +='_no_mean_removed'
-    mcDir +='_no_mean_removed'
-    plotDir +='_no_mean_removed'
+if removeMean==True:
+    specDir +='_mean_removed'
+    mcDir +='_mean_removed'
+    plotDir +='_mean_removed'
 if len(sys.argv)> 2:
     mapDir= 'maps_%s_%s/'%(pixel,sys.argv[2])
     specDir += '_%s'%(sys.argv[2])
@@ -65,10 +66,10 @@ for f1 in freqTags:
         white_noise_level[f1,f2,'beamName']=p['beam_%s_T'%f1],p['beam_%s_Pol'%f2]
 
 mcDir=None
-#iso_map_plot_utils.plot_survey_map(p,auxDir,mapDir,plotDir,pixel,winList,survey_mask_coordinates=survey_mask_coordinates,tessel_healpix=tessel_healpix,color_range=None)
-#iso_map_plot_utils.plot_all_windows(auxDir,plotDir,pixel,winList,tessel_healpix=tessel_healpix)
-#color_range=[400,50,50]
-#iso_map_plot_utils.plot_all_maps(auxDir,mapDir,plotDir,pixel,winList,nSplits,color_range=color_range,survey_mask_coordinates=survey_mask_coordinates,tessel_healpix=tessel_healpix)
+iso_map_plot_utils.plot_survey_map(p,auxDir,mapDir,plotDir,pixel,winList,survey_mask_coordinates=survey_mask_coordinates,tessel_healpix=tessel_healpix,color_range=None)
+iso_map_plot_utils.plot_all_windows(auxDir,plotDir,pixel,winList,tessel_healpix=tessel_healpix)
+color_range=[400,50,50]
+iso_map_plot_utils.plot_all_maps(auxDir,mapDir,plotDir,pixel,winList,nSplits,color_range=color_range,survey_mask_coordinates=survey_mask_coordinates,tessel_healpix=tessel_healpix)
 #iso_spectra_plot_utils.plot_all_spectra(mcmDir,specDir,hdf5,winList,nSplits,tessel_healpix=tessel_healpix)
 
-iso_spectra_plot_utils.plot_all_spectra(mcmDir,specDir,plotDir,winList,nSplits,hdf5,type,theoryFile,lmax,compare_mosaic_namaster=False,white_noise_level=white_noise_level,mcDir=mcDir)
+iso_spectra_plot_utils.plot_all_spectra(mcmDir,specDir,plotDir,winList,nSplits,hdf5,type,theoryFile,lmax,compare_mosaic_namaster=compareMosaicNaMaster,white_noise_level=white_noise_level,mcDir=mcDir)

@@ -29,8 +29,8 @@ specDir = 'spectra_%s'%pixel
 
 if naMaster==True:
     specDir +='_namaster'
-if removeMean==False:
-    specDir +='_no_mean_removed'
+if removeMean==True:
+    specDir +='_mean_removed'
 if len(sys.argv)> 2:
     mapDir= 'maps_%s_%s/'%(pixel,sys.argv[2])
     specDir += '_%s'%(sys.argv[2])
