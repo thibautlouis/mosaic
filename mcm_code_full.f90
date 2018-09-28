@@ -1,5 +1,5 @@
 ! FFLAGS="-fopenmp -fPIC -Ofast -ffree-line-length-none" f2py-2.7 -c -m mcm_code_full mcm_code_full.f90 wigner3j_sub.f -lgomp
-! scinet: FFLAGS="-openmp -Ofast -fPIC -xhost" f2py --fcompiler=intelem --noopt -c -m mcm_code_full TS_mcm_code_full.f90 wigner3j_sub.f -liomp5
+! scinet: FFLAGS="-openmp -Ofast -fPIC -xhost" f2py --fcompiler=intelem --noopt -c -m mcm_code_full mcm_code_full.f90 wigner3j_sub.f -liomp5
 
 subroutine calc_mcm(cl,cl_TP,cl_PT,cl_pol,wl_TT,wl_TP,wl_PT,wl_PP, mcm, mcm_Tp, mcm_pT, mcm_pp, mcm_mm)
     implicit none
