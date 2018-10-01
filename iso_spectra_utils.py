@@ -30,8 +30,8 @@ def get_spectra(mapDir,auxDir,mcmDir,specDir,winList,nSplits,lmax,binningFile,ty
     nPatch,freq=iso_window_utils.get_frequency_list(winList)
 
     for i in range(nPatch):
-        spec_list = open('%s/spectra_list_%03d.txt'%(specDir,i),mode="w")
-        spec_list_combined = open('%s/spectra_list_combined_%03d.txt'%(specDir,i),mode="w")
+        spec_list = open('%s/spectra_list_%03d.txt'%(auxDir,i),mode="w")
+        spec_list_combined = open('%s/spectra_list_combined_%03d.txt'%(auxDir,i),mode="w")
 
         if len(freq[i]) !=0:
             patch_name='patch_%03d'%i
