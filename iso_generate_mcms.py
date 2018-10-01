@@ -10,6 +10,7 @@ import iso_window_utils
 import iso_mode_coupling_utils
 import sys
 import os
+from mpi4py import MPI
 
 
 
@@ -28,11 +29,30 @@ iso_map_utils.create_directory(mcmDir)
 
 binLo,binHi,binSize= iso_ps_utils.read_binning_file(p['binningFile'],p['lmax'])
 
-
 winList=auxDir+'window_list.txt'
 spectraList=iso_window_utils.get_spectra_list(winList)
 
-for spec in spectraList:
+comm = MPI.COMM_WORLD
+rank = comm.Get_rank()
+size = comm.Get_size()
+
+iStart = 0
+iStop = len(spectraList)
+
+delta = (iStop - iStart)/size
+if delta == 0:
+    raise ValueError, 'Too many processors for too small a  loop!'
+
+iMin = iStart+rank*delta
+iMax = iStart+(rank+1)*delta
+
+if iMax>iStop:
+    iMax = iStop
+elif (iMax > (iStop - delta)) and iMax <iStop:
+    iMax = iStop
+
+for iii in xrange(iMin,iMax):
+    spec=spectraList[iii]
     print spec
     i,f1,f2=spec[0],spec[1],spec[2]
     ell,Wl_array=iso_ps_utils.get_window_beam_array(p,f1,f2,lmax)
