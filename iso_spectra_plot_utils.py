@@ -56,8 +56,9 @@ def plot_cl_dict(plotDir,patchName,fName,type,lb,dictList,dictNames,fields,theor
         lth,clth_dict=dict_from_theory_file(fields,theoryFile,lmax)
 
     if Bblfile is not None:
+        # Not implemented yet
         Bbl=np.load('%s'%Bblfile)
-        cbth_dict=bin_dict(Bbl,plot_cl_dict)
+        cbth_dict=bin_dict(Bbl,clth_dict)
 
     if type=='Dl':
         fb=lb*0+1

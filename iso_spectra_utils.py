@@ -36,8 +36,6 @@ def get_spectra(mapDir,auxDir,mcmDir,specDir,winList,nSplits,lmax,binningFile,ty
         if len(freq[i]) !=0:
             patch_name='patch_%03d'%i
 
-            if hdf5==True:
-                patch = file.create_group(patch_name)
 
             alms={}
             for f1 in freq[i]:

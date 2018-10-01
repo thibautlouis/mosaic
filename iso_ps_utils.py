@@ -82,7 +82,7 @@ def write_cl_dict(dirName,patchName,fName,l,cl_dict,hdf5=False,file=None):
         cl=np.array(cl)
         np.savetxt(dirName+'/%s_'%patchName+fName+'.dat', np.transpose(cl),header=str)
     else:
-        spec=file.create_group(patchName+fName)
+        spec=file.create_group(patchName+'_'+fName)
         array=get_cl_array(l,cl_dict)
         spec.create_dataset(name='data',data=array,dtype='float')
 
@@ -92,8 +92,8 @@ def read_cl_dict(dirName,patchName,fName,hdf5=False,file=None):
     if hdf5==False:
         data=np.loadtxt(dirName+'/%s_'%patchName+fName+'.dat')
     else:
-        spec=file[patchName+'/%s'%fName]
-        data=spec['data']
+        spec=file[patchName+'_'+fName]
+        data=np.array(spec['data']).T
 
     l=data[:,0]
     cl_dict={}

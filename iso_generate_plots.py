@@ -50,9 +50,6 @@ if len(sys.argv)> 2:
 
 iso_map_utils.create_directory(plotDir)
 
-
-
-
 winList=auxDir+'window_list.txt'
 
 white_noise_level={}
