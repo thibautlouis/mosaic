@@ -34,9 +34,9 @@ mcDir=  'montecarlo_%s'%pixel
 if naMaster==True:
     specDir +='_namaster'
     mcDir +='_namaster'
-if removeMean==False:
-    specDir +='_no_mean_removed'
-    mcDir +='_no_mean_removed'
+if removeMean==True:
+    specDir +='_mean_removed'
+    mcDir +='_mean_removed'
 
 iStart=p['iStart']
 iStop=p['iStop']
