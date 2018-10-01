@@ -36,23 +36,9 @@ comm = MPI.COMM_WORLD
 rank = comm.Get_rank()
 size = comm.Get_size()
 
-iStart = 0
-iStop = len(spectraList)
+print 'rank',rank,'size',size
+for spec in spectraList[rank::size]:
 
-delta = (iStop - iStart)/size
-if delta == 0:
-    raise ValueError, 'Too many processors for too small a  loop!'
-
-iMin = iStart+rank*delta
-iMax = iStart+(rank+1)*delta
-
-if iMax>iStop:
-    iMax = iStop
-elif (iMax > (iStop - delta)) and iMax <iStop:
-    iMax = iStop
-
-for iii in xrange(iMin,iMax):
-    spec=spectraList[iii]
     print spec
     i,f1,f2=spec[0],spec[1],spec[2]
     ell,Wl_array=iso_ps_utils.get_window_beam_array(p,f1,f2,lmax)
