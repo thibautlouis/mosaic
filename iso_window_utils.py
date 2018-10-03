@@ -92,7 +92,8 @@ def mask_healpix(auxDir, p, template, plot=False):
     tessel_healpix=p['tessel_healpix']
     apo_type=p['apo_type']
     apo_radius=p['apo_radius']
-    
+    deg_to_rad=np.pi/180
+
     def get_fsky(mask):
         return(np.sum(mask)/np.sum(mask*0+1))
 
@@ -125,9 +126,14 @@ def mask_healpix(auxDir, p, template, plot=False):
             return(disk)
 
         theta_c,phi_c=theta_phi_healpix(tessel_healpix['patch_nside'])
+        
+        theta_min=theta_c-(tessel_healpix['radius']+1)*deg_to_rad
+        theta_max=theta_c+(tessel_healpix['radius']+1)*deg_to_rad
+        
+        np.savetxt('%s/window_theta_range.txt'%auxDir,np.transpose([theta_min,theta_max]))
+                   
         n_disks=len(theta_c)
         nside=hp.pixelfunc.get_nside(template)
-        deg_to_rad=np.pi/180
 
         print 'generate %d patch from the Healpix map'%n_disks
         

@@ -30,12 +30,34 @@ def get_window_beam_array(p,f1,f2,lmax):
     
     return( ell,W )
 
-def map2alm(map,pixel,lmax=None):
+def map2alm(map,pixel,niter,lmax=None,theta_range=None):
+    
+    # This is a generalized version of map2alm"
+    # Allow to do spherical transform on healpix, healpix with theta_cut and car
+    # Also allow to iterate to get more precise transform (this bit need more testing)
+    
     if pixel=='healpix':
-        return hp.sphtfunc.map2alm(map)
+        if theta_range is None:
+            alm= hp.sphtfunc.map2alm(map,iter=niter)
+        else:
+            from enlib import curvedsky
+            nside=hp.pixelfunc.get_nside(map)
+            alm= curvedsky.map2alm_healpix(map,lmax=3*nside-1,theta_min=theta_range[0], theta_max=theta_range[1])
+            if iter !=0:
+                map_copy=map.copy()
+                alm= curvedsky.map2alm_healpix(map,lmax=3*nside-1,theta_min=theta_range[0], theta_max=theta_range[1])
+                for k in range(niter):
+                    alm += curvedsky.map2alm_healpix(map-curvedsky.alm2map_healpix(alm,map_copy),lmax=3*nside-1,theta_min=thetas[0], theta_max=thetas[1])
+        return alm
+
     if pixel=='car':
         from enlib import curvedsky
         alm = curvedsky.map2alm(map,lmax= lmax)
+        if iter !=0:
+            map_copy=map.copy()
+            for k in range(niter):
+                alm += curvedsky.map2alm(map-curvedsky.alm2map(alm,map_copy),lmax=lmax)
+
         alm = alm.astype(np.complex128)
         return alm
 

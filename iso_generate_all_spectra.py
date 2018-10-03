@@ -4,6 +4,7 @@ from mpi4py import MPI
 import iso_dict
 import sys
 import os
+import time
 
 comm = MPI.COMM_WORLD
 rank = comm.Get_rank()
@@ -24,10 +25,10 @@ if delta == 0:
 
 print delta
 
-
+t=time.time()
 for i in range(iStart+rank, iStop, size):
     print "compiling  in iteration %03d"%i
     os.system('iso_generate_spectra.py %s %03d'%(sys.argv[1],i))
-
+print time.time()-t
 
 

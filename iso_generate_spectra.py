@@ -21,6 +21,8 @@ type=p['type']
 lmax=p['lmax']
 survey_mask_coordinates=p['survey_mask_coordinate']
 removeMean=p['removeMean']
+theta_cut=p['theta_cut']
+niter=p['niter']
 
 mapDir= 'maps_%s/'%pixel
 auxDir = 'auxMaps_%s/'%pixel
@@ -39,7 +41,7 @@ if len(sys.argv)> 2:
 winList=auxDir+'window_list.txt'
 
 if naMaster==False:
-    iso_spectra_utils.get_spectra(mapDir,auxDir,mcmDir,specDir,winList,nSplits,lmax,binningFile,type,hdf5,pixel,survey_mask_coordinates=survey_mask_coordinates,removeMean=removeMean)
+    iso_spectra_utils.get_spectra(mapDir,auxDir,mcmDir,specDir,winList,nSplits,niter,lmax,binningFile,type,hdf5,pixel,survey_mask_coordinates=survey_mask_coordinates,removeMean=removeMean,theta_cut=theta_cut)
 else:
     iso_spectra_utils.get_spectra_namaster(p,mapDir,auxDir,mcmDir,specDir,winList,nSplits,lmax,type,pixel,nlb=50)
 

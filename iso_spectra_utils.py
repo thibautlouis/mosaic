@@ -16,7 +16,7 @@ def write_in_hdf5(name,lb,cb_dict):
     spec.create_dataset(name='data',data=array,dtype='float')
 
 
-def get_spectra(mapDir,auxDir,mcmDir,specDir,winList,nSplits,lmax,binningFile,type,hdf5,pixel,survey_mask_coordinates=None,removeMean=None):
+def get_spectra(mapDir,auxDir,mcmDir,specDir,winList,nSplits,niter,lmax,binningFile,type,hdf5,pixel,survey_mask_coordinates=None,removeMean=None,theta_cut=None):
 
     if hdf5==True:
         file = h5py.File('%s.hdf5'%(specDir), 'w')
@@ -28,6 +28,9 @@ def get_spectra(mapDir,auxDir,mcmDir,specDir,winList,nSplits,lmax,binningFile,ty
         ra0,ra1,dec0,dec1=np.loadtxt(survey_mask_coordinates,unpack=True, usecols=range(1,5),ndmin=2)
 
     nPatch,freq=iso_window_utils.get_frequency_list(winList)
+
+    if theta_cut==True:
+        theta_range=np.loadtxt('%s/window_theta_range.txt'%(auxDir))
 
     for i in range(nPatch):
         spec_list = open('%s/spectra_list_%03d.txt'%(auxDir,i),mode="w")
@@ -58,7 +61,12 @@ def get_spectra(mapDir,auxDir,mcmDir,specDir,winList,nSplits,lmax,binningFile,ty
 
                     for ii in range(3):
                         map[ii]*=window[ii]
-                    alms[f1,s]=iso_ps_utils.map2alm(map,pixel,lmax)
+                    
+                    thetas=None
+                    if theta_cut==True:
+                        thetas=theta_range[i,:]
+
+                    alms[f1,s]=iso_ps_utils.map2alm(map,pixel,niter,lmax=lmax,theta_range=thetas)
         
             count1=0
             for f1 in freq[i]:
