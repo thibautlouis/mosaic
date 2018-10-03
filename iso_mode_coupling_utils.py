@@ -123,9 +123,9 @@ def get_mode_coupling(auxDir,mcmDir,i,f1,f2,Wl_array,binLo,binHi,binSize,lmax,ty
     win_pol_2=iso_map_utils.read_map(auxDir,'/window_%s_%03d_pol.fits'%(f2,i),pixel)
 
     alm_T_1=iso_ps_utils.map2alm(win_T_1,pixel,niter=3,lmax=lmax)
-    alm_Pol_1=iso_ps_utils.map2alm(win_pol_1,niter=3,pixel,lmax=lmax)
-    alm_T_2=iso_ps_utils.map2alm(win_T_2,niter=3,pixel,lmax=lmax)
-    alm_Pol_2=iso_ps_utils.map2alm(win_pol_2,niter=3,pixel,lmax=lmax)
+    alm_Pol_1=iso_ps_utils.map2alm(win_pol_1,pixel,niter=3,lmax=lmax)
+    alm_T_2=iso_ps_utils.map2alm(win_T_2,pixel,niter=3,lmax=lmax)
+    alm_Pol_2=iso_ps_utils.map2alm(win_pol_2,pixel,niter=3,lmax=lmax)
         
     wcl={}
         
