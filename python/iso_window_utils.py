@@ -7,7 +7,6 @@ import iso_map_utils
 import iso_apodization_utils
 import os
 
-
 def get_frequency_list(win_list):
     winList=np.genfromtxt(win_list,unpack=True,dtype='str')
     num = [int(i) for i in winList[0]]
@@ -58,40 +57,38 @@ def apply_mask(map,mName,pixel,box):
     map*=m
     return(map)
 
-def apply_ps_mask(p,mask,template,f,pixel,box=None):
+def apply_ps_mask(mask,template,f,pixel,box=None):
     
     maskT=template.copy()
     maskPol=template.copy()
     if mask['point_mask_T']==True:
-        mName=p['pts_mask_T_%s_%s'%(pixel,f)]
+        mName=mask['pts_mask_T_%s_%s'%(pixel,f)]
         maskT=apply_mask(maskT,mName,pixel,box)
-    if mask['point_mask_Pol']==True:
-        mName=p['pts_mask_Pol_%s_%s'%(pixel,f)]
+    if mask['point_mask_pol']==True:
+        mName=mask['pts_mask_pol_%s_%s'%(pixel,f)]
         maskPol=apply_mask(maskPol,mName,pixel,box)
         
     return(maskT,maskPol)
 
-def apply_gal_mask(p,mask,template,f,pixel,box=None):
+def apply_gal_mask(mask,template,f,pixel,box=None):
     
     maskT=template.copy()
     maskPol=template.copy()
     if mask['gal_mask_T']==True:
-        mName=p['gal_mask_T_%s_%s'%(pixel,f)]
+        mName=mask['gal_mask_T_%s_%s'%(pixel,f)]
         maskT=apply_mask(maskT,mName,pixel,box)
-    if mask['gal_mask_Pol']==True:
-        mName=p['gal_mask_Pol_%s_%s'%(pixel,f)]
+    if mask['gal_mask_pol']==True:
+        mName=mask['gal_mask_pol_%s_%s'%(pixel,f)]
         maskPol=apply_mask(maskPol,mName,pixel,box)
     
     return(maskT,maskPol)
 
-def mask_healpix(auxDir, p, template, plot=False):
+
+
+
+
+def mask_healpix(auxDir, freqTags, pixel, tessel_healpix, mask, apo_type, apo_radius, template, plot=False):
     
-    freqTags=p['freqTags']
-    mask=p['mask']
-    pixel=p['pixelisation']
-    tessel_healpix=p['tessel_healpix']
-    apo_type=p['apo_type']
-    apo_radius=p['apo_radius']
     deg_to_rad=np.pi/180
 
     def get_fsky(mask):
@@ -102,7 +99,7 @@ def mask_healpix(auxDir, p, template, plot=False):
     ps_maskT={}
     ps_maskPol={}
     for f in freqTags:
-        ps_maskT[f],ps_maskPol[f]=apply_ps_mask(p,mask,survey_mask,f,pixel)
+        ps_maskT[f],ps_maskPol[f]=apply_ps_mask(mask,survey_mask,f,pixel)
         ps_maskT[f]=iso_apodization_utils.create_apodization(ps_maskT[f], pixel, apo_type,apo_radius['ps'])
         ps_maskPol[f]=iso_apodization_utils.create_apodization(ps_maskPol[f], pixel, apo_type,apo_radius['ps'])
     
@@ -147,7 +144,7 @@ def mask_healpix(auxDir, p, template, plot=False):
             win_list.write('%03d'%i)
 
             for f in freqTags:
-                surveymask_T,surveymask_Pol=apply_gal_mask(p,mask,survey_mask,f,pixel)
+                surveymask_T,surveymask_Pol=apply_gal_mask(mask,survey_mask,f,pixel)
                 fsky_mask=get_fsky(surveymask_T)
                 use_frac=fsky_mask/fsky_disk
                 
@@ -183,7 +180,7 @@ def mask_healpix(auxDir, p, template, plot=False):
         win_list.write('000')
 
         for f in freqTags:
-            surveymask_T,surveymask_Pol=apply_gal_mask(p,mask,survey_mask,f,pixel)
+            surveymask_T,surveymask_Pol=apply_gal_mask(mask,survey_mask,f,pixel)
             
             surveymask_T=iso_apodization_utils.create_apodization(surveymask_T, pixel, apo_type,apo_radius['survey'])
             surveymask_Pol=iso_apodization_utils.create_apodization(surveymask_Pol, pixel, apo_type,apo_radius['survey'])
@@ -204,16 +201,11 @@ def mask_healpix(auxDir, p, template, plot=False):
 
     win_list.close()
 
-def rectangle_mask_car(auxDir, p, template, plot=False):
+def rectangle_mask_car(auxDir, freqTags, pixel, survey_mask_coordinate, mask, apo_type, apo_radius, template, plot=False):
     from enlib import enmap
     
-    ra0,ra1,dec0,dec1=np.loadtxt(p['survey_mask_coordinate'],unpack=True, usecols=range(1,5),ndmin=2)
+    ra0,ra1,dec0,dec1=np.loadtxt(survey_mask_coordinate,unpack=True, usecols=range(1,5),ndmin=2)
     nPatch=len(ra0)
-    freqTags=p['freqTags']
-    mask=p['mask']
-    pixel=p['pixelisation']
-    apo_type=p['apo_type']
-    apo_radius=p['apo_radius']
     
     win_list = open('%s/window_list.txt'%auxDir,mode="w")
 
@@ -228,14 +220,14 @@ def rectangle_mask_car(auxDir, p, template, plot=False):
         for f in freqTags:
             survey_mask[:,:]=1
             
-            ps_maskT,ps_maskPol=apply_ps_mask(p,mask,survey_mask,f,pixel,box)
+            ps_maskT,ps_maskPol=apply_ps_mask(mask,survey_mask,f,pixel,box)
             ps_maskT=iso_apodization_utils.create_apodization(ps_maskT, pixel, apo_type,apo_radius['ps'])
             ps_maskPol=iso_apodization_utils.create_apodization(ps_maskPol, pixel, apo_type,apo_radius['ps'])
 
             survey_mask[:,:]=0
             survey_mask[1:-1,1:-1]=1
 
-            surveymask_T,surveymask_Pol=apply_gal_mask(p,mask,survey_mask,f,pixel,box)
+            surveymask_T,surveymask_Pol=apply_gal_mask(mask,survey_mask,f,pixel,box)
             surveymask_T=iso_apodization_utils.create_apodization(surveymask_T, pixel, apo_type,apo_radius['survey'])
             surveymask_Pol=iso_apodization_utils.create_apodization(surveymask_Pol, pixel, apo_type,apo_radius['survey'])
             

@@ -46,7 +46,7 @@ def plot_maps(maps,pixel,mask=0,color='planck',color_range=None,png_file=None,gn
         if color=='planck':
             from matplotlib.colors import ListedColormap
             path=(os.path.dirname(os.path.realpath(__file__)))
-            colombi1_cmap = ListedColormap(np.loadtxt('%s/Planck_Parchment_RGB.txt'%path)/255.)
+            colombi1_cmap = ListedColormap(np.loadtxt('%s/../data/Planck_Parchment_RGB.txt'%path)/255.)
             colombi1_cmap.set_bad("white") # color of missing pixels
             colombi1_cmap.set_under("white")
             cmap = colombi1_cmap
@@ -143,9 +143,10 @@ def plot_maps(maps,pixel,mask=0,color='planck',color_range=None,png_file=None,gn
 
 def plot_all_windows(auxDir,plotDir,pixel,winList,tessel_healpix=None):
     
-    if tessel_healpix['apply']:
-        long_c,lat_c=lon_lat_healpix(tessel_healpix['patch_nside'])
-        radius=tessel_healpix['radius']
+    if pixel=='healpix':
+        if tessel_healpix['apply']:
+            long_c,lat_c=lon_lat_healpix(tessel_healpix['patch_nside'])
+            radius=tessel_healpix['radius']
 
 
     nPatch,freq=iso_window_utils.get_frequency_list(winList)
@@ -157,8 +158,9 @@ def plot_all_windows(auxDir,plotDir,pixel,winList,tessel_healpix=None):
             window_pol=  iso_map_utils.read_map(auxDir,winName_pol+'.fits',pixel)
             
             gnomview_coord=None
-            if tessel_healpix['apply']:
-                gnomview_coord=[long_c[i],lat_c[i],radius]
+            if pixel=='healpix':
+                if tessel_healpix['apply']:
+                    gnomview_coord=[long_c[i],lat_c[i],radius]
 
             plot_maps(window_T,pixel, png_file=plotDir+'/'+winName_T,gnomview_coord=gnomview_coord)
             plot_maps(window_pol,pixel, png_file=plotDir+'/'+winName_pol,gnomview_coord=gnomview_coord)
@@ -167,11 +169,13 @@ def plot_all_maps(auxDir,mapDir,plotDir,pixel,winList,nSplits,color_range=None,s
     
     if pixel=='car':
         ra0,ra1,dec0,dec1=np.loadtxt(survey_mask_coordinates,unpack=True, usecols=range(1,5),ndmin=2)
-    if tessel_healpix['apply']:
-        long_c,lat_c=lon_lat_healpix(tessel_healpix['patch_nside'])
-        radius=tessel_healpix['radius']
-    else:
-        gnomview_coord=None
+    
+    if pixel=='healpix':
+        if tessel_healpix['apply']:
+            long_c,lat_c=lon_lat_healpix(tessel_healpix['patch_nside'])
+            radius=tessel_healpix['radius']
+        else:
+            gnomview_coord=None
 
     nPatch,freq=iso_window_utils.get_frequency_list(winList)
 
@@ -192,8 +196,10 @@ def plot_all_maps(auxDir,mapDir,plotDir,pixel,winList,nSplits,color_range=None,s
                 for ii in range(3):
                     maps[ii]*=window[ii]
                 gnomview_coord=None
-                if tessel_healpix['apply']:
-                    gnomview_coord=[long_c[i],lat_c[i],radius]
+                if pixel=='healpix':
+
+                    if tessel_healpix['apply']:
+                        gnomview_coord=[long_c[i],lat_c[i],radius]
                 plot_maps(maps,pixel,mask=0,color='planck',color_range=color_range,png_file=plotDir+'/'+fName+'_%03d'%i,gnomview_coord=gnomview_coord)
 
 def plot_survey_map(p,auxDir,mapDir,plotDir,pixel,winList,color_range=None,survey_mask_coordinates=None,tessel_healpix=None):

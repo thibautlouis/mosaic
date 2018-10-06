@@ -28,7 +28,7 @@ def get_distance(binary,pixel):
         
         hp.fitsfunc.write_map('tempmask', binary)
         write_dict_file()
-        os.system('sh process_mask.sh')
+        os.system('my_process_mask')
         dist=hp.fitsfunc.read_map('tempfile')
         os.system('rm -rf tempfile')
         os.system('rm -rf tempmask')
@@ -76,15 +76,45 @@ def apod_C3(binary,radius,pixel):
     if pixel=='healpix':
         return 'C3 not available for healpix pixellisation'
     
-    from flipperPol import *
     from enlib import enmap
+    from flipper import *
+
     print radius
     binary_flipper=enmap.to_flipper(binary)
-    win=liteMapPol.initializeCosineWindow(binary_flipper,radius,0)
+    win=car_cosine_window(binary_flipper,radius,0)
     win_enmap=enmap.from_flipper(win)
     return(win_enmap)
 
-
+def car_cosine_window(liteMap,lenApod,pad):
+    
+    Nx=liteMap.Nx
+    Ny=liteMap.Ny
+    win=liteMap.copy()
+    win.data[:]=1
+    winX=win.copy()
+    winY=win.copy()
+    Id=np.ones((Ny,Nx))
+    
+    degToPix_x=np.pi/180/liteMap.pixScaleX
+    degToPix_y=np.pi/180/liteMap.pixScaleY
+    
+    lenApod_x=int(lenApod*degToPix_x)
+    lenApod_y=int(lenApod*degToPix_y)
+    pad_x=int(pad*degToPix_x)
+    pad_y=int(pad*degToPix_y)
+    
+    for i in range(pad_x,lenApod_x+pad_x):
+        r=float(i)-pad_x
+        winX.data[:,i]=1./2*(Id[:,i]-np.cos(-np.pi*r/lenApod_x))
+        winX.data[:,Nx-i-1]=winX.data[:,i]
+    for j in range(pad_y,lenApod_y+pad_y):
+        r=float(j)-pad_y
+        winY.data[j,:]=1./2*(Id[j,:]-np.cos(-np.pi*r/lenApod_y))
+        winY.data[Ny-j-1,:]=winY.data[j,:]
+    
+    win.data[:]=0
+    win.data[pad_y:Ny-pad_y,pad_x:Nx-pad_x]+=winX.data[pad_y:Ny-pad_y,pad_x:Nx-pad_x]*winY.data[pad_y:Ny-pad_y,pad_x:Nx-pad_x]
+    return(win)
 
 
 def create_apodization(binary, pixel, apo_type, apo_radius):

@@ -1,0 +1,75 @@
+\documentclass[a4paper, 11pt]{article}
+\usepackage{graphicx,wrapfig,subfigure,amsmath,amssymb,epsfig,bm}
+\usepackage{listings,textcomp,color,geometry}
+\usepackage{spverbatim}
+
+\geometry{hmargin=2cm, vmargin=2cm}
+
+\def\Box{\mathord{\dalemb{7.9}{8}\hbox{\hskip1pt}}}
+\def\dalemb#1#2{{\vbox{\hrule height.#2pt
+        \hbox{\vrule width.#2pt height#1pt \kern#1pt \vrule width.#2pt}
+        \hrule height.#2pt}}}
+
+\def\eop{\mathcal{E}}
+\def\bop{\mathcal{B}}
+\def\ba{\begin{eqnarray}}
+\def\ea{\end{eqnarray}}
+\def\be{\begin{equation}}
+\def\ee{\end{equation}}
+\def\tr{{\rm tr}}
+\def\Var{{\rm Var}}
+\def\gtorder{\mathrel{\raise.3ex\hbox{$>$}\mkern-14mu
+             \lower0.6ex\hbox{$\sim$}}}
+\def\ltorder{\mathrel{\raise.3ex\hbox{$<$}\mkern-14mu
+             \lower0.6ex\hbox{$\sim$}}}
+
+\def\bb{{\mathfrak b}}
+\newcommand{\ellb }{\boldsymbol{\ell }}
+
+% Personal colors defined here
+\newcommand{\skn}[1]{{\color{red}#1}}
+\newcommand{\TIB}[1]{{\color{blue}#1}}
+\newcommand{\assume}[1]{{\bf#1}}
+
+\begin{document}
+
+\title{Mosaic: a code for power spectrum analysis in multiple patches}
+\maketitle
+
+\section{Intro}
+
+Mosaic is a set of tools for computing angular power spectra in healpix and CAR pixellisation using the Master algorithm (arxiv:0105302).
+It makes heavy use of healpix function (https://healpix.sourceforge.io/) and enlib function (see Sigurd Naess github: https://github.com/amaurea), and has benefited from Eiichiro Komatsu tools (https://www.mpa.mpa-garching.mpg.de/~komatsu/), SPHT are performed using libsharp (arXiv:1303.4945) so we are especially thankful to Martin Reinecke and Dag Sverre Seljebotn.
+The code also allows to make comparison with NaMaster (see David Alonso github: https://github.com/damonge/).
+While the bugs are all on me, special thanks for Sigurd Naess for help with the code.
+
+\section{Installation}
+
+The code is mostly written in python apart from the mode coupling calculation written in fortran 90. You need to compile it using f2py. 
+You should  
+
+\section{Code structure}
+
+The code is structured around four executables (located in the ${\textit bin} $ directory): 
+\begin{enumerate}
+\item ${\textit  iso\_generate\_sims.py }$
+\item ${\textit  iso\_generate\_window\_functions.py }$
+\item ${\textit  iso\_generate\_mcms.py  }$
+\item ${\textit  iso\_generate\_all\_spectra.py  }$
+\item ${\textit  iso\_generate\_mc\_results.py  } $
+\item ${\textit  iso\_generate\_plots.py  } $
+\end{enumerate}
+
+They should be run in order.  
+Two other executables:  ${\textit  iso\_generate\_plots.py  }$ and ${\textit  iso\_generate\_mc\_results.py  }$ allow for visualisation and combination of the results.
+
+\subsection{Generation of simulations}
+
+Gaussian simulations are generated from a camb lensed power spectrum.
+
+
+
+
+\end{document}
+
+

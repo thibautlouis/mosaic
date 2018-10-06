@@ -1,5 +1,13 @@
 #!/usr/bin/env python
 
+# This executable generates mode coupling matrix that will be used to deconvolve the effect of the window function
+# The MPI loop is done on the multiple patches we want to analyze.
+# It first create a spectra_list corresponding to all combination of spectra (auto-freq, cross freq), this step is done automatically from the window function list.
+# The executable uses the following arguments in the dictionnary file:
+# 'lmax': the maximum multipole we want to consider
+# 'type': 'Dl' or 'Cl', the type for spectra you want to reconstruct
+# 'binningFile': a binningFile with three colums: binMin, binMax, binMean
+
 import healpy as hp
 import numpy as np
 import pylab as plt
@@ -12,14 +20,11 @@ import sys
 import os
 from mpi4py import MPI
 
-
-
 p = iso_dict.flipperDict()
 p.read_from_file(sys.argv[1])
 
 freqTags=p['freqTags']
 pixel=p['pixelisation']
-
 auxDir = 'auxMaps_%s/'%pixel
 mcmDir = 'mcm_%s/'%pixel
 lmax= p['lmax']

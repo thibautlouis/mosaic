@@ -16,7 +16,7 @@ def write_in_hdf5(name,lb,cb_dict):
     spec.create_dataset(name='data',data=array,dtype='float')
 
 
-def get_spectra(mapDir,auxDir,mcmDir,specDir,winList,nSplits,niter,lmax,binningFile,type,hdf5,pixel,survey_mask_coordinates=None,removeMean=None,theta_cut=None):
+def get_spectra(mapDir,auxDir,mcmDir,specDir,winList,nSplits,niter,lmax,binningFile,type,hdf5,pixel,survey_mask_coordinates=None,removeMean=None,thetaCut=None):
 
     if hdf5==True:
         file = h5py.File('%s.hdf5'%(specDir), 'w')
@@ -29,7 +29,7 @@ def get_spectra(mapDir,auxDir,mcmDir,specDir,winList,nSplits,niter,lmax,binningF
 
     nPatch,freq=iso_window_utils.get_frequency_list(winList)
 
-    if theta_cut==True:
+    if thetaCut==True:
         theta_range=np.loadtxt('%s/window_theta_range.txt'%(auxDir))
 
     for i in range(nPatch):
@@ -62,7 +62,7 @@ def get_spectra(mapDir,auxDir,mcmDir,specDir,winList,nSplits,niter,lmax,binningF
                         map[ii]*=window[ii]
                     
                     thetas=None
-                    if pixel=='healpix' and nPatch!=1 and theta_cut==True:
+                    if pixel=='healpix' and nPatch!=1 and thetaCut==True:
                         thetas=theta_range[i,:]
 
                     alms[f1,s]=iso_ps_utils.map2alm(map,pixel,niter,lmax=lmax,theta_range=thetas)

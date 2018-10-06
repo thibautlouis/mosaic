@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+
+# This is just a MPI loop for iso_generate_spectra
+
 import time
 from mpi4py import MPI
 import iso_dict

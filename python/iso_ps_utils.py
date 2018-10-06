@@ -19,9 +19,9 @@ def read_binning_file(file,lmax):
 def get_window_beam_array(p,f1,f2,lmax):
     W={}
     ell,fell_T_1=np.loadtxt(p['beam_%s_T'%f1],unpack=True)
-    ell,fell_Pol_1=np.loadtxt(p['beam_%s_Pol'%f1],unpack=True)
+    ell,fell_Pol_1=np.loadtxt(p['beam_%s_pol'%f1],unpack=True)
     ell,fell_T_2=np.loadtxt(p['beam_%s_T'%f2],unpack=True)
-    ell,fell_Pol_2=np.loadtxt(p['beam_%s_Pol'%f2],unpack=True)
+    ell,fell_Pol_2=np.loadtxt(p['beam_%s_pol'%f2],unpack=True)
     ell,fell_T_1,fell_Pol_1,fell_T_2,fell_Pol_2= ell[:lmax],fell_T_1[:lmax],fell_Pol_1[:lmax],fell_T_2[:lmax],fell_Pol_2[:lmax]
     W['TT']=fell_T_1*fell_T_2
     W['TP']=fell_T_1*fell_Pol_2
@@ -61,18 +61,28 @@ def map2alm(map,pixel,niter,lmax=None,theta_range=None):
         alm = alm.astype(np.complex128)
         return alm
 
-def read_clth_file(clfile,lmax=None):
+def read_clth_file(clfile,type,lmax=None):
     fields=['TT','EE','BB','TE']
     cl={}
     lth, cl['TT'], cl['EE'], cl['BB'], cl['TE'] = np.loadtxt(clfile,unpack=True)
     fth=lth*(lth+1)/(2*np.pi)
-    for l1 in fields:
-        cl[l1]/=fth
-        cl[l1][0]=0
-    if lmax is None:
-        return(lth,cl['TT'], cl['EE'], cl['BB'], cl['TE'])
-    else:
-        return(lth[:lmax],cl['TT'][:lmax], cl['EE'][:lmax], cl['BB'][:lmax], cl['TE'][:lmax])
+    if type=='Cl':
+        for l1 in fields:
+            cl[l1]/=fth
+            cl[l1][0]=0
+
+    if lmax is not None:
+        lth=lth[:lmax]
+        for l1 in fields:
+            cl[l1]=cl[l1][:lmax]
+
+    cl['ET']=cl['TE']
+    cl['TB']=cl['TT']*0
+    cl['BT']=cl['TT']*0
+    cl['EB']=cl['TT']*0
+    cl['BE']=cl['TT']*0
+
+    return(lth,cl)
 
 def get_cl_dict(alm1,alm2):
     # For the auto it's a bit stupid but here we go
