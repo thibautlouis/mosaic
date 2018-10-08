@@ -3,3 +3,4 @@ python/mcm_code_full.so: python/mcm_code_full.f90 python/wigner3j_sub.f
 clean:
 	rm -f python/*.so
 	rm -rf python/*.so.dSYM
+	rm -rf  python/*.pyc
