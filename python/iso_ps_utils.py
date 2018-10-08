@@ -198,7 +198,8 @@ def get_cl_array(lb,cb_dict):
     return(array)
 
 def get_mean_dict(list_dict,get_std=False):
-    if len(list_dict) > 1:
+    nDict=len(list_dict)
+    if nDict > 1:
         fields=['TT','EE','BB','TE','EB','TB','ET','BE','BT']
         cl_mean={}
         if get_std==True:
@@ -227,3 +228,4 @@ def get_noise_dict(auto,cross):
     for l1 in fields:
         noise[l1]=auto[l1]-cross[l1]
     return noise
+

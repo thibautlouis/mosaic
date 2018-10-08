@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2018.5.2)  6 OCT 2018 19:24
+This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2018.5.2)  7 OCT 2018 19:00
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -517,7 +517,7 @@ ealpix func-tion (https://healpix.sourceforge.io/)
  []
 
 
-Overfull \hbox (38.60086pt too wide) in paragraph at lines 63--65
+Overfull \hbox (38.60086pt too wide) in paragraph at lines 71--73
 []\OT1/cmr/m/n/10.95 They should be run in or-der. Two other ex-e-cuta-bles: $[
 ]$ and $[]$
  []
@@ -527,11 +527,11 @@ Overfull \hbox (38.60086pt too wide) in paragraph at lines 63--65
 {/usr/local/texlive/2018/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
 (./mosaic_doc.aux) ) 
 Here is how much of TeX's memory you used:
- 5092 strings out of 492649
- 70366 string characters out of 6129623
- 139780 words of memory out of 5000000
- 8880 multiletter control sequences out of 15000+600000
- 15474 words of font info for 56 fonts, out of 8000000 for 9000
+ 5094 strings out of 492649
+ 70390 string characters out of 6129623
+ 140780 words of memory out of 5000000
+ 8881 multiletter control sequences out of 15000+600000
+ 15642 words of font info for 57 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  41i,6n,32p,385b,217s stack positions out of 5000i,500n,10000p,200000b,80000s
 </usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsf
@@ -540,11 +540,12 @@ nts/cm/cmmi10.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfon
 ts/cm/cmr10.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts
 /cm/cmr12.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/c
 m/cmr17.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/
-cmti10.pfb>
-Output written on mosaic_doc.pdf (1 page, 73900 bytes).
+cmti10.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/c
+mtt10.pfb>
+Output written on mosaic_doc.pdf (1 page, 87913 bytes).
 PDF statistics:
- 32 PDF objects out of 1000 (max. 8388607)
- 22 compressed objects within 1 object stream
+ 36 PDF objects out of 1000 (max. 8388607)
+ 25 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
  1 words of extra memory for PDF output out of 10000 (max. 10000000)
 

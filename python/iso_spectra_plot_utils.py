@@ -25,7 +25,7 @@ def dict_from_theory_file(fields,theoryFile,lmax):
 
     return lth,clth_dict
 
-def get_nlth(noiseInfo,beamName,fields,lmax):
+def get_nlth(noiseInfo,beamName,fields,lmax,type):
              
     l,fell_T=np.loadtxt(beamName[0],unpack=True)
     l,fell_Pol=np.loadtxt(beamName[1],unpack=True)
@@ -38,27 +38,57 @@ def get_nlth(noiseInfo,beamName,fields,lmax):
         nl_th[l1]=np.zeros(lmax)
         label_th[l1]=''
     
+    lth=np.arange(2,lmax+2)
+
+    
     nl_th['TT']=np.ones(lmax)*(rmsT*np.pi/(60*180))**2/fell_T[:lmax]**2*noiseInfo[0]
     label_th['TT']='rms T %0.2f uk.arcmin'%rmsT
     nl_th['EE']=np.ones(lmax)*(rmsP*np.pi/(60*180))**2/fell_Pol[:lmax]**2*noiseInfo[0]
     nl_th['BB']=np.ones(lmax)*(rmsP*np.pi/(60*180))**2/fell_Pol[:lmax]**2*noiseInfo[0]
     label_th['EE']='rms pol %0.2f uk.arcmin'%rmsP
     label_th['BB']='rms pol %0.2f uk.arcmin'%rmsP
+    
+    if type=='Dl':
+        for l1 in fields:
+            nl_th[l1]*=lth*(lth+1)/(2*np.pi)
 
     return(nl_th,label_th)
 
-def plot_cl_dict(plotDir,patchName,fName,type,lb,dictList,dictNames,fields,theoryFile,lmax,stdList=None,Bblfile=None,semilog_T=False,semilog_pol=False,noiseInfo=None,beamName=None):
+def bin_theory(Bbl_T,Bbl_Tp,Bbl_pT,Bbl_pol,clth,lmax):
+    cbth={}
+    cbth['TT']=np.dot(Bbl_T,clth['TT'])
+    cbth['TE']=np.dot(Bbl_Tp,clth['TE'])
+    cbth['ET']=np.dot(Bbl_pT,clth['TE'])
+    cbth['TB']=cbth['TT'][:lmax]*0
+    cbth['BT']=cbth['TT'][:lmax]*0
+    
+    vec=np.zeros((4*lmax))
+    vec[:lmax]=clth['EE'][:lmax]
+    vec[lmax:2*lmax]=clth['EE'][:lmax]*0
+    vec[2*lmax:3*lmax]=clth['EE'][:lmax]*0
+    vec[3*lmax:4*lmax]=clth['BB'][:lmax]
+    
+    Nbin= Bbl_pol.shape[0]/4
+    vecb=np.dot(Bbl_pol,vec)
+    cbth['EE']=vecb[:Nbin]
+    cbth['EB']=vecb[Nbin:2*Nbin]
+    cbth['BE']=vecb[2*Nbin:3*Nbin]
+    cbth['BB']=vecb[3*Nbin:4*Nbin]
+    return(cbth)
+
+
+def plot_cl_dict(plotDir,name,type,lb,dictList,dictNames,fields,theoryFile,lmax,stdList=None,Bblfile=None,semilog_T=False,semilog_pol=False,noiseInfo=None,beamName=None):
     
     if noiseInfo is not None and beamName is not None:
-        nl_th,label_th=get_nlth(noiseInfo,beamName,fields,lmax)
+        nl_th,label_th=get_nlth(noiseInfo,beamName,fields,lmax,type)
 
     if theoryFile is not None:
         lth,clth_dict=dict_from_theory_file(fields,theoryFile,lmax)
 
     if Bblfile is not None:
-        # Not implemented yet
-        Bbl=np.load('%s'%Bblfile)
-        cbth_dict=bin_dict(Bbl,clth_dict)
+        print 'Not implemented yet'
+        #Bbl=np.load('%s'%Bblfile)
+        #cbth_dict=bin_dict(Bbl,clth_dict)
 
     if type=='Dl':
         fb=lb*0+1
@@ -77,8 +107,8 @@ def plot_cl_dict(plotDir,patchName,fName,type,lb,dictList,dictNames,fields,theor
             plt.semilogy()
         plt.errorbar(lth,clth_dict[l1],label='CMB')
         if noiseInfo is not None:
-            plt.errorbar(lth,clth_dict[l1]+nl_th[l1]*lth*(lth+1)/(2*np.pi))
-            plt.errorbar(lth,nl_th[l1]*lth*(lth+1)/(2*np.pi))
+            plt.errorbar(lth,clth_dict[l1]+nl_th[l1])
+            plt.errorbar(lth,nl_th[l1])
             plt.legend()
         if Bblfile:
             plt.errorbar(lb,cbth_dict[l1])
@@ -100,8 +130,8 @@ def plot_cl_dict(plotDir,patchName,fName,type,lb,dictList,dictNames,fields,theor
             plt.xlabel(r'$\ell$',fontsize=22)
         count+=1
 
-    plt.suptitle('%s %s'%(patchName,fName),fontsize=22)
-    plt.savefig('%s/%s_%s.png'%(plotDir,patchName,fName),bbox_inches='tight')
+    plt.suptitle('%s'%(name),fontsize=22)
+    plt.savefig('%s/%s.png'%(plotDir,name),bbox_inches='tight')
     plt.clf()
     plt.close()
 
@@ -168,23 +198,29 @@ def plot_all_spectra(mcmDir,specDir,plotDir,winList,nSplits,hdf5,type,theoryFile
                                 naMasterSpecDir=specDir[:-4]+'_namaster'+id
                                 lb, cbList, dictNamesList,stdList=increment_dict_list(naMasterSpecDir,fName,'namaster',cbList, dictNamesList ,stdList)
 
-                            plot_cl_dict(plotDir,patchName,fName,type,lb,cbList,dictNamesList,fields,theoryFile,lmax,stdList=stdList,Bblfile=None,semilog_T=True,semilog_pol=True)
+                            name= '%s_%s'%(patchName,fName)
+                            plot_cl_dict(plotDir,name,type,lb,cbList,dictNamesList,fields,theoryFile,lmax,stdList=stdList,Bblfile=None,semilog_T=True,semilog_pol=True)
           
                             
                             count_s2+=1
                         count_s1+=1
                         
                     fName='%s_%sGHzx%sGHz_mean_auto_binned'%(type,f1,f2)
+                    name= '%s_%s'%(patchName,fName)
+
                     lb, cbListAuto, dNameAuto,stdListAuto= increment_dict_list(specDir,fName,'mosaic',[], [] ,[])
-                    plot_cl_dict(plotDir,patchName,fName,type,lb,cbListAuto,dNameAuto,fields,theoryFile,lmax,stdList=stdListAuto,Bblfile=None,semilog_T=False,noiseInfo=white_noise_level[f1,f2,'noiseInfo'],beamName=white_noise_level[f1,f2,'beamName'])
+                    plot_cl_dict(plotDir,name,type,lb,cbListAuto,dNameAuto,fields,theoryFile,lmax,stdList=stdListAuto,Bblfile=None,semilog_T=False,noiseInfo=white_noise_level[f1,f2,'noiseInfo'],beamName=white_noise_level[f1,f2,'beamName'])
 
                     fName='%s_%sGHzx%sGHz_mean_cross_binned'%(type,f1,f2)
+                    name= '%s_%s'%(patchName,fName)
+
                     lb, cbListCross, dNameCross,stdListCross= increment_dict_list(specDir,fName,'mosaic',[], [],[])
-                    plot_cl_dict(plotDir,patchName,fName,type,lb,cbListCross,dNameCross,fields,theoryFile,lmax,stdList=stdListCross,Bblfile=None,semilog_T=False)
+                    plot_cl_dict(plotDir,name,type,lb,cbListCross,dNameCross,fields,theoryFile,lmax,stdList=stdListCross,Bblfile=None,semilog_T=False)
 
                     fName='%s_%sGHzx%sGHz_mean_noise_binned'%(type,f1,f2)
+                    name= '%s_%s'%(patchName,fName)
                     lb, NbList, dNameNoise,stdListNoise= increment_dict_list(specDir,fName,'mosaic',[], [],[])
-                    plot_cl_dict(plotDir,patchName,fName,type,lb,NbList,dNameNoise,fields,theoryFile,lmax,stdList=stdListNoise,Bblfile=None,semilog_T=True,semilog_pol=True,noiseInfo=white_noise_level[f1,f2,'noiseInfo'],beamName=white_noise_level[f1,f2,'beamName'])
+                    plot_cl_dict(plotDir,name,type,lb,NbList,dNameNoise,fields,theoryFile,lmax,stdList=stdListNoise,Bblfile=None,semilog_T=True,semilog_pol=True,noiseInfo=white_noise_level[f1,f2,'noiseInfo'],beamName=white_noise_level[f1,f2,'beamName'])
 
                     count2+=1
                 count1+=1

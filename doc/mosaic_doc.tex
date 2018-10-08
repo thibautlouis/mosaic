@@ -46,7 +46,15 @@ While the bugs are all on me, special thanks for Sigurd Naess for help with the 
 \section{Installation}
 
 The code is mostly written in python apart from the mode coupling calculation written in fortran 90. You need to compile it using f2py. 
-You should  
+Just use the make file in the mosaic folder.
+Then copy in your .bashrc the following lines:
+
+\begin{spverbatim}
+export PATH=${PATH}:PATH_TO_MOSAIC/mosaic/bin
+export PATH=${PATH}:PATH_TO_MOSAIC/mosaic/tests
+export PYTHONPATH=${PYTHONPATH}:PATH_TO_MOSAIC/mosaic/python
+\end{spverbatim}
+
 
 \section{Code structure}
 
