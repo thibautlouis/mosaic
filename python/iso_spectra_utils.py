@@ -97,7 +97,7 @@ def get_spectra(mapDir,auxDir,mcmDir,specDir,winList,nSplits,niter,lmax,binningF
                             spec_list.write('%s \n'%fName)
 
                             
-                            if s1 == s2  and f1 == f2:
+                            if s1 == s2 :
                                 print 'auto',s1,s2,f1,f2
                                 dict_list_auto+=[cb_dict]
                             else:
@@ -126,8 +126,8 @@ def get_spectra(mapDir,auxDir,mcmDir,specDir,winList,nSplits,niter,lmax,binningF
                     count2+=1
                 count1+=1
                 
-                spec_list.close()
-                spec_list_combined.close()
+        spec_list.close()
+        spec_list_combined.close()
                     
     if hdf5==True:
         file.close()
@@ -231,5 +231,5 @@ def get_spectra_namaster(p,mapDir,auxDir,mcmDir,specDir,winList,nSplits,lmax,typ
                     count2+=1
                 count1+=1
                 
-                spec_list.close()
+        spec_list.close()
 

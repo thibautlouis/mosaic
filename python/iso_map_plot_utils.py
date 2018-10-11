@@ -33,7 +33,7 @@ def get_disk(nside,radius,theta,phi):
     disk=hp.query_disc(nside, vec, radius)
     return(disk)
 
-def plot_maps(maps,pixel,mask=0,color='planck',color_range=None,png_file=None,gnomview_coord=None):
+def plot_maps(maps,pixel,mask=0,color='planck',color_range=None,png_file=None,gnomview_coord=None,title='',cbar=True):
     
     def get_xsize_from_radius(radius):
         reso=1.5
@@ -51,18 +51,20 @@ def plot_maps(maps,pixel,mask=0,color='planck',color_range=None,png_file=None,gn
             colombi1_cmap.set_under("white")
             cmap = colombi1_cmap
         else:
-            cmap= plt.get_cmap('jet')
+            cmap= plt.get_cmap(color)
+            cmap.set_bad("white") # color of missing pixels
+            cmap.set_under("white")
 
         if maps.ndim==1:
             
             if gnomview_coord is None:
                 if color_range is not None:
-                    hp.mollview(maps,min=color_range,max=color_range,cmap=cmap, notext=True)
+                    hp.mollview(maps,min=color_range,max=color_range,cmap=cmap, notext=True,title=title,cbar=cbar)
                 else:
-                    hp.mollview(maps,cmap=cmap, notext=True)
+                    hp.mollview(maps,cmap=cmap, notext=True,title=title,cbar=cbar)
 
                 if png_file is not None:
-                    plt.savefig(png_file+'.png')
+                    plt.savefig(png_file+'.png', bbox_inches='tight')
                     plt.clf()
                     plt.close
                 else:
@@ -71,17 +73,19 @@ def plot_maps(maps,pixel,mask=0,color='planck',color_range=None,png_file=None,gn
             else:
                 xsize=get_xsize_from_radius(gnomview_coord[2])
                 if color_range is not None:
-                    hp.visufunc.gnomview(maps,min=-color_range,max=color_range, rot=(gnomview_coord[0],gnomview_coord[1]),xsize=xsize,cmap=cmap)
+                    hp.visufunc.gnomview(maps,min=-color_range,max=color_range, rot=(gnomview_coord[0],gnomview_coord[1]),xsize=xsize,cmap=cmap,title=title)
                 else:
-                    hp.visufunc.gnomview(maps, rot=(gnomview_coord[0],gnomview_coord[1]),xsize=xsize,cmap=cmap)
+                    hp.visufunc.gnomview(maps, rot=(gnomview_coord[0],gnomview_coord[1]),xsize=xsize,cmap=cmap,title=title)
                 if png_file is not None:
-                    plt.savefig(png_file+'_projected.png')
+                    plt.savefig(png_file+'_projected.png', bbox_inches='tight')
                     plt.clf()
                     plt.close
                 else:
                     plt.show()
         else:
             fields=['T','Q','U']
+            
+            
             if color_range is not None:
                 min={}
                 max={}
@@ -93,12 +97,12 @@ def plot_maps(maps,pixel,mask=0,color='planck',color_range=None,png_file=None,gn
                 
                 if gnomview_coord is None:
                     if color_range is not None:
-                        hp.mollview(map,min=min[l1],max=max[l1],cmap=cmap, notext=True)
+                        hp.mollview(map,min=min[l1],max=max[l1],cmap=cmap, notext=True,title=l1+''+title,cbar=cbar)
                     else:
-                        hp.mollview(map,cmap=cmap, notext=True)
+                        hp.mollview(map,cmap=cmap, notext=True,title=l1+''+title,cbar=cbar)
 
                     if png_file is not None:
-                        plt.savefig(png_file+'_%s'%l1+'.png')
+                        plt.savefig(png_file+'_%s'%l1+'.png', bbox_inches='tight')
                         plt.clf()
                         plt.close
                     else:
@@ -106,12 +110,12 @@ def plot_maps(maps,pixel,mask=0,color='planck',color_range=None,png_file=None,gn
                 else:
                     xsize=get_xsize_from_radius(gnomview_coord[2])
                     if color_range is not None:
-                        hp.visufunc.gnomview(map,min=min[l1],max=max[l1], rot=(gnomview_coord[0],gnomview_coord[1]),xsize=xsize,cmap=cmap)
+                        hp.visufunc.gnomview(map,min=min[l1],max=max[l1], rot=(gnomview_coord[0],gnomview_coord[1]),xsize=xsize,cmap=cmap,title=l1+''+title)
                     else:
-                        hp.visufunc.gnomview(map, rot=(gnomview_coord[0],gnomview_coord[1]),xsize=xsize,cmap=cmap)
+                        hp.visufunc.gnomview(map, rot=(gnomview_coord[0],gnomview_coord[1]),xsize=xsize,cmap=cmap,title=l1+''+title)
 
                     if png_file is not None:
-                        plt.savefig(png_file+'_%s'%l1+'_projected.png')
+                        plt.savefig(png_file+'_%s'%l1+'_projected.png', bbox_inches='tight')
                         plt.clf()
                         plt.close
                     else:
@@ -162,8 +166,8 @@ def plot_all_windows(auxDir,plotDir,pixel,winList,tessel_healpix=None):
                 if tessel_healpix['apply']:
                     gnomview_coord=[long_c[i],lat_c[i],radius]
 
-            plot_maps(window_T,pixel, png_file=plotDir+'/'+winName_T,gnomview_coord=gnomview_coord)
-            plot_maps(window_pol,pixel, png_file=plotDir+'/'+winName_pol,gnomview_coord=gnomview_coord)
+            plot_maps(window_T,pixel, png_file=plotDir+'/'+winName_T,gnomview_coord=gnomview_coord,title= 'window T %s GHz'%f1)
+            plot_maps(window_pol,pixel, png_file=plotDir+'/'+winName_pol,gnomview_coord=gnomview_coord,title= 'window Pol %s GHz'%f1)
 
 def plot_all_maps(auxDir,mapDir,plotDir,pixel,winList,nSplits,color_range=None,survey_mask_coordinates=None,tessel_healpix=None):
     
@@ -200,9 +204,9 @@ def plot_all_maps(auxDir,mapDir,plotDir,pixel,winList,nSplits,color_range=None,s
 
                     if tessel_healpix['apply']:
                         gnomview_coord=[long_c[i],lat_c[i],radius]
-                plot_maps(maps,pixel,mask=0,color='planck',color_range=color_range,png_file=plotDir+'/'+fName+'_%03d'%i,gnomview_coord=gnomview_coord)
+                plot_maps(maps,pixel,mask=0,color='planck',color_range=color_range,png_file=plotDir+'/'+fName+'_%03d'%i,gnomview_coord=gnomview_coord,title= 'map %s GHz'%f1)
 
-def plot_survey_map(p,auxDir,mapDir,plotDir,pixel,winList,color_range=None,survey_mask_coordinates=None,tessel_healpix=None):
+def plot_survey_map(auxDir,mapDir,plotDir,pixel,winList,mask,freqTags,color_range=None,survey_mask_coordinates=None,tessel_healpix=None):
     if pixel=='car':
         from enlib import enmap,enplot
         ra0,ra1,dec0,dec1=np.loadtxt(survey_mask_coordinates,unpack=True, usecols=range(1,5),ndmin=2)
@@ -217,29 +221,35 @@ def plot_survey_map(p,auxDir,mapDir,plotDir,pixel,winList,color_range=None,surve
                 img_tot = enplot.merge_images([img, img_box])
                 img_tot.save('%s/im_%03d.png'%(plotDir,i))
     if pixel=='healpix':
-        mask=p['mask']
         deg_to_rad=np.pi/180
         if tessel_healpix['apply']:
             theta_c,phi_c=theta_phi_healpix(tessel_healpix['patch_nside'])
             nPatch,freq=iso_window_utils.get_frequency_list(winList)
-            for i in range(nPatch):
-                for f1 in freq[i]:
-                    fName='split_%d_%s'%(0,f1)
-                    maps=iso_map_utils.read_map(mapDir,fName+'.fits',pixel)
-                    nside=hp.pixelfunc.get_nside(maps)
-                    T=maps[0]
-                    
-                    if mask['gal_mask_T']==True:
-                        mName=p['gal_mask_T_%s_%s'%(pixel,f1)]
-                        T=iso_window_utils.apply_mask(T,mName,pixel,box=None)
+            
+            
+            fName='split_%d_%s'%(0,freqTags[0])
+            maps=iso_map_utils.read_map(mapDir,fName+'.fits',pixel)
+            nside=hp.pixelfunc.get_nside(maps)
+            T=maps[0]*0
+                
+            for f1 in freqTags:
+                if mask['gal_mask_T']==True:
+                    mName=mask['gal_mask_T_%s_%s'%(pixel,f1)]
+                    m=hp.read_map(mName)
+                    m=1-m
+                    T+=m
 
-                    template=T.copy()
-                    template*=0
-                    radius1=tessel_healpix['radius']*deg_to_rad
-                    disk1=get_disk(nside,radius1,theta_c[i],phi_c[i])
-                    template[disk1]+=1
-                    disk2=get_disk(nside,radius1*1.05,theta_c[i],phi_c[i])
-                    template[disk2]+=1
-                    id=np.where(template==1)
-                    T[id]=np.nan
-                    plot_maps(T,pixel,png_file=plotDir+'/im_%03d_%s.png'%(i,f1))
+            for i in range(nPatch):
+  
+                template=T.copy()
+                Tnew=T.copy()
+
+                template*=0
+                radius1=tessel_healpix['radius']*deg_to_rad
+                disk1=get_disk(nside,radius1,theta_c[i],phi_c[i])
+                template[disk1]+=1
+                disk2=get_disk(nside,radius1*1.05,theta_c[i],phi_c[i])
+                template[disk2]+=1
+                id=np.where(template==1)
+                Tnew[id]=np.nan
+                plot_maps(Tnew,pixel,png_file=plotDir+'/im_%03d'%(i),title='',cbar=False,color='plasma')

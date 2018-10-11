@@ -53,6 +53,7 @@ clfile=p['clfile']
 freqTags=p['freqTags']
 nSplit= p['nSplit']
 pixel=p['pixelisation']
+noise=p['noise']
 
 if pixel=='healpix':
     nside= p['nside']
@@ -91,7 +92,7 @@ for iii in xrange(iMin,iMax):
             m=curvedsky.alm2map(alm_beamed, template)
 
         for s in range(nSplit):
-            maps=iso_map_utils.add_noise(m,p['rms_%s_T'%f],p['rms_%s_pol'%f],nSplit,pixel)
+            maps=iso_map_utils.add_noise(m,f,s,noise,nSplit,pixel)
             
             fName='split_%d_%s.fits'%(s,f)
             

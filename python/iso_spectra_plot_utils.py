@@ -40,7 +40,6 @@ def get_nlth(noiseInfo,beamName,fields,lmax,type):
     
     lth=np.arange(2,lmax+2)
 
-    
     nl_th['TT']=np.ones(lmax)*(rmsT*np.pi/(60*180))**2/fell_T[:lmax]**2*noiseInfo[0]
     label_th['TT']='rms T %0.2f uk.arcmin'%rmsT
     nl_th['EE']=np.ones(lmax)*(rmsP*np.pi/(60*180))**2/fell_Pol[:lmax]**2*noiseInfo[0]
@@ -77,7 +76,8 @@ def bin_theory(Bbl_T,Bbl_Tp,Bbl_pT,Bbl_pol,clth,lmax):
     return(cbth)
 
 
-def plot_cl_dict(plotDir,name,type,lb,dictList,dictNames,fields,theoryFile,lmax,stdList=None,Bblfile=None,semilog_T=False,semilog_pol=False,noiseInfo=None,beamName=None):
+def plot_cl_dict(plotDir,specName,type,lb,dictList,dictNames,fields,theoryFile,lmax,stdList=None,Bblfile=None,\
+                 semilog_T=False,semilog_pol=False,noiseInfo=None,beamName=None):
     
     if noiseInfo is not None and beamName is not None:
         nl_th,label_th=get_nlth(noiseInfo,beamName,fields,lmax,type)
@@ -105,33 +105,32 @@ def plot_cl_dict(plotDir,name,type,lb,dictList,dictNames,fields,theoryFile,lmax,
             plt.semilogy()
         if l1=='BB' and semilog_pol:
             plt.semilogy()
-        plt.errorbar(lth,clth_dict[l1],label='CMB')
+        plt.errorbar(lth,clth_dict[l1],label='CMB',color='black')
         if noiseInfo is not None:
-            plt.errorbar(lth,clth_dict[l1]+nl_th[l1])
-            plt.errorbar(lth,nl_th[l1])
-            plt.legend()
+            plt.errorbar(lth,clth_dict[l1]+nl_th[l1],label='CMB+noise',color='blue')
+            plt.errorbar(lth,nl_th[l1],label='noise',color='grey')
         if Bblfile:
             plt.errorbar(lb,cbth_dict[l1])
         
         if stdList is not None:
             for dict,std,name in zip(dictList,stdList,dictNames):
-                plt.errorbar(lb,dict[l1]*fb,std[l1]*fb,fmt='o',label='%s'%name)
+                plt.errorbar(lb,dict[l1]*fb,std[l1]*fb,fmt='o',label='%s'%name,color='red')
         else:
             for dict,name in zip(dictList,dictNames):
                 if name=='namaster':
                     plt.errorbar(lb,dict[l1]*fb,fmt='-',label='%s'%name)
                 else:
-                    plt.errorbar(lb,dict[l1]*fb,fmt='o',label='%s'%name)
+                    plt.errorbar(lb,dict[l1]*fb,fmt='o',label='%s'%name,color='red')
 
         plt.ylabel(r'$D^{%s}_{\ell}$'%l1,fontsize=18)
-        if count==1:
-            plt.legend()
+        if count==3:
+            plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
         if count>6:
             plt.xlabel(r'$\ell$',fontsize=22)
         count+=1
 
-    plt.suptitle('%s'%(name),fontsize=22)
-    plt.savefig('%s/%s.png'%(plotDir,name),bbox_inches='tight')
+    plt.suptitle('%s'%(specName),fontsize=22)
+    plt.savefig('%s/%s.png'%(plotDir,specName),bbox_inches='tight')
     plt.clf()
     plt.close()
 
@@ -198,29 +197,42 @@ def plot_all_spectra(mcmDir,specDir,plotDir,winList,nSplits,hdf5,type,theoryFile
                                 naMasterSpecDir=specDir[:-4]+'_namaster'+id
                                 lb, cbList, dictNamesList,stdList=increment_dict_list(naMasterSpecDir,fName,'namaster',cbList, dictNamesList ,stdList)
 
-                            name= '%s_%s'%(patchName,fName)
-                            plot_cl_dict(plotDir,name,type,lb,cbList,dictNamesList,fields,theoryFile,lmax,stdList=stdList,Bblfile=None,semilog_T=True,semilog_pol=True)
+                            specName= '%s_%s'%(patchName,fName)
+                            if (f1==f2) & (s1==s2):
+                                plot_cl_dict(plotDir,specName,type,lb,cbList,dictNamesList,fields,theoryFile,lmax,stdList=stdList,Bblfile=None,\
+                                             semilog_T=True,noiseInfo=white_noise_level[f1,f2,'noiseInfo'],beamName=white_noise_level[f1,f2,'beamName'])
+
+                            else:
+                                plot_cl_dict(plotDir,specName,type,lb,cbList,dictNamesList,fields,theoryFile,lmax,stdList=stdList,Bblfile=None,\
+                                             semilog_T=True)
           
-                            
                             count_s2+=1
                         count_s1+=1
                         
                     fName='%s_%sGHzx%sGHz_mean_auto_binned'%(type,f1,f2)
-                    name= '%s_%s'%(patchName,fName)
+                    specName= '%s_%s'%(patchName,fName)
 
                     lb, cbListAuto, dNameAuto,stdListAuto= increment_dict_list(specDir,fName,'mosaic',[], [] ,[])
-                    plot_cl_dict(plotDir,name,type,lb,cbListAuto,dNameAuto,fields,theoryFile,lmax,stdList=stdListAuto,Bblfile=None,semilog_T=False,noiseInfo=white_noise_level[f1,f2,'noiseInfo'],beamName=white_noise_level[f1,f2,'beamName'])
+                    plot_cl_dict(plotDir,specName,type,lb,cbListAuto,dNameAuto,fields,theoryFile,lmax,stdList=stdListAuto,Bblfile=None,\
+                                 semilog_T=False,noiseInfo=white_noise_level[f1,f2,'noiseInfo'],beamName=white_noise_level[f1,f2,'beamName'])
 
                     fName='%s_%sGHzx%sGHz_mean_cross_binned'%(type,f1,f2)
-                    name= '%s_%s'%(patchName,fName)
+                    specName= '%s_%s'%(patchName,fName)
 
                     lb, cbListCross, dNameCross,stdListCross= increment_dict_list(specDir,fName,'mosaic',[], [],[])
-                    plot_cl_dict(plotDir,name,type,lb,cbListCross,dNameCross,fields,theoryFile,lmax,stdList=stdListCross,Bblfile=None,semilog_T=False)
+                    plot_cl_dict(plotDir,specName,type,lb,cbListCross,dNameCross,fields,theoryFile,lmax,stdList=stdListCross,Bblfile=None,\
+                                 semilog_T=False)
 
                     fName='%s_%sGHzx%sGHz_mean_noise_binned'%(type,f1,f2)
-                    name= '%s_%s'%(patchName,fName)
+                    specName= '%s_%s'%(patchName,fName)
                     lb, NbList, dNameNoise,stdListNoise= increment_dict_list(specDir,fName,'mosaic',[], [],[])
-                    plot_cl_dict(plotDir,name,type,lb,NbList,dNameNoise,fields,theoryFile,lmax,stdList=stdListNoise,Bblfile=None,semilog_T=True,semilog_pol=True,noiseInfo=white_noise_level[f1,f2,'noiseInfo'],beamName=white_noise_level[f1,f2,'beamName'])
+                    
+                    if f1==f2:
+                        plot_cl_dict(plotDir,specName,type,lb,NbList,dNameNoise,fields,theoryFile,lmax,stdList=stdListNoise,Bblfile=None,\
+                                     semilog_T=True,semilog_pol=True,noiseInfo=white_noise_level[f1,f2,'noiseInfo'],beamName=white_noise_level[f1,f2,'beamName'])
+                    else:
+                        plot_cl_dict(plotDir,specName,type,lb,NbList,dNameNoise,fields,theoryFile,lmax,stdList=stdListNoise,Bblfile=None,\
+                                     semilog_T=False,semilog_pol=False,noiseInfo=white_noise_level[f1,f2,'noiseInfo'],beamName=white_noise_level[f1,f2,'beamName'])
 
                     count2+=1
                 count1+=1

@@ -9,8 +9,13 @@ import sys
 import iso_window_utils
 import iso_map_utils
 import iso_spectra_plot_utils
+import iso_map_plot_utils
+import iso_html_utils
 import h5py
-
+import os
+from PIL import Image
+from PIL import ImageFont
+from PIL import ImageDraw
 
 def plot_mc_biais(iStart,iStop,plotDir,name,lb,cb_dict,std_dict,clth,cbth,fields):
     
@@ -67,25 +72,35 @@ clfile=p['clfile_trunc']
 freqTags=p['freqTags']
 iStart=p['iStart']
 iStop=p['iStop']
+mask=p['mask']
+survey_mask_coordinates=p['survey_mask_coordinate']
+tessel_healpix=p['tessel_healpix']
 
 
+mapDir= 'maps_%s'%pixel
 auxDir = 'auxMaps_%s/'%pixel
 mcmDir= 'mcm_%s/'%pixel
 mcDir=  'montecarlo_%s'%pixel
 plotDir= 'plots_mc_%s'%pixel
+htmlDir= 'webpage_mc_%s'%pixel
 
 if naMaster==True:
     mcDir +='_namaster'
     plotDir+='_namaster'
-
+    htmlDir+='_namaster'
 if removeMean==True:
     mcDir +='_mean_removed'
     plotDir +='_mean_removed'
+    htmlDir +='_mean_removed'
+mapDir+='_%03d/'%(0)
 
 iso_map_utils.create_directory(plotDir)
+iso_map_utils.create_directory(htmlDir)
 
 
 winList=auxDir+'window_list.txt'
+iso_map_plot_utils.plot_survey_map(auxDir,mapDir,plotDir,pixel,winList,mask,freqTags,survey_mask_coordinates=survey_mask_coordinates,tessel_healpix=tessel_healpix,color_range=None)
+
 nPatch,freq=iso_window_utils.get_frequency_list(winList)
 
 if hdf5==True:
@@ -104,7 +119,6 @@ for f1 in freqTags:
             white_noise_level[f1,f2]=0,0
         
         white_noise_level[f1,f2,'beamName']=p['beam_%s_T'%f1],p['beam_%s_pol'%f2]
-
 
 for i in range(nPatch):
     patchName='patch_%03d'%i
@@ -152,3 +166,79 @@ for i in range(nPatch):
                 count2+=1
             count1+=1
 
+
+path=(os.path.dirname(os.path.realpath(__file__)))
+os.system('cp %s/../data/multistep2.js ./%s/multistep2.js'%(path,htmlDir))
+    
+fileName='%s/isotropy.html'%htmlDir
+g = open(fileName,mode="w")
+g.write('<html>\n')
+g.write('<head>\n')
+g.write('<title> Mosaic </title>\n')
+g.write('<script src="multistep2.js"></script>\n')
+g.write('<script> add_step("sub",  ["j","k"]) </script> \n')
+g.write('<script> add_step("all",  ["c","v"]) </script> \n')
+g.write('</head> \n')
+g.write('<body> \n')
+g.write('<div class=sub> \n')
+    
+for i in range(nPatch):
+    patchName='patch_%03d'%i
+    g.write('<div class=all>\n')
+    
+    survey= Image.open('%s/im_%03d.png'%(plotDir,i))
+    count1=0
+    for f1 in freqTags:
+        count2=0
+        for f2 in freqTags:
+            if count2>count1:
+                continue
+            count_s1=0
+            for s1 in range(nSplits):
+                count_s2=0
+                for s2 in range(nSplits):
+                    if ((f1==f2) & (count_s2>count_s1)):
+                        break
+                    fName='patch_%03d_mc_averaged_%s_%sGHzx%sGHz_split%dxsplit%d_binned.png'%(i,type,f1,f2,s1,s2)
+                    iso_html_utils.spectra_image(htmlDir,plotDir,fName,i,null=True)
+                    g.write('<img src="'+fName+'" width="100%" /> \n')
+                    fName='diff_patch_%03d_mc_averaged_%s_%sGHzx%sGHz_split%dxsplit%d_binned.png'%(i,type,f1,f2,s1,s2)
+                    iso_html_utils.spectra_image(htmlDir,plotDir,fName,i,null=True)
+                    g.write('<img src="'+fName+'" width="100%" /> \n')
+
+                    count_s2+=1
+                count_s1+=1
+            count2+=1
+        count1+=1
+        
+    if len(freq[i]) !=0:
+        count1=0
+        for f1 in freq[i]:
+            count2=0
+            for f2 in freq[i]:
+                if count2>count1:
+                    continue
+                count_s1=0
+                for s1 in range(nSplits):
+                    count_s2=0
+                    for s2 in range(nSplits):
+                        if ((f1==f2) & (count_s2>count_s1)):
+                            break
+                        fName='patch_%03d_mc_averaged_%s_%sGHzx%sGHz_split%dxsplit%d_binned.png'%(i,type,f1,f2,s1,s2)
+                        iso_html_utils.spectra_image(htmlDir,plotDir,fName,i,null=False)
+                        g.write('<img src="'+fName+'" width="100%" /> \n')
+                        fName='diff_patch_%03d_mc_averaged_%s_%sGHzx%sGHz_split%dxsplit%d_binned.png'%(i,type,f1,f2,s1,s2)
+                        iso_html_utils.spectra_image(htmlDir,plotDir,fName,i,null=False)
+                        g.write('<img src="'+fName+'" width="100%" /> \n')
+
+                        count_s2+=1
+                    count_s1+=1
+                count2+=1
+            count1+=1
+    
+    g.write('</div>\n')
+
+g.write('</div> \n')
+g.write('</body> \n')
+g.write('</html> \n')
+g.close()

@@ -32,6 +32,7 @@ import os
 p = iso_dict.flipperDict()
 p.read_from_file(sys.argv[1])
 
+freqTags=p['freqTags']
 nSplits= p['nSplit']
 pixel=p['pixelisation']
 hdf5=p['hdf5']
@@ -40,12 +41,12 @@ lmax=p['lmax']
 theoryFile=p['clfile_trunc']
 survey_mask_coordinates=p['survey_mask_coordinate']
 tessel_healpix=p['tessel_healpix']
-freqTags=p['freqTags']
 removeMean=p['removeMean']
 compareMosaicNaMaster=p['compareMosaicNaMaster']
 colorRange=p['colorRange']
-
-
+naMaster=p['useNaMaster']
+mask=p['mask']
+noise=p['noise']
 
 mapDir= 'maps_%s/'%pixel
 auxDir = 'auxMaps_%s/'%pixel
@@ -76,9 +77,9 @@ white_noise_level={}
 for f1 in freqTags:
     for f2 in freqTags:
         if f1==f2:
-            white_noise_level[f1,f2,'noiseInfo']=nSplits,p['rms_%s_T'%f1],p['rms_%s_pol'%f2]
+            white_noise_level[f1,f2,'noiseInfo']=nSplits,noise['rms_%s_T'%f1],noise['rms_%s_pol'%f2]
         else :
-            white_noise_level[f1,f2]=0,0
+            white_noise_level[f1,f2,'noiseInfo']=nSplits,0,0
         
         white_noise_level[f1,f2,'beamName']=p['beam_%s_T'%f1],p['beam_%s_pol'%f2]
 
@@ -86,7 +87,9 @@ if p['useMcErrors'] ==False:
     mcDir=None
 
 
-iso_map_plot_utils.plot_survey_map(p,auxDir,mapDir,plotDir,pixel,winList,survey_mask_coordinates=survey_mask_coordinates,tessel_healpix=tessel_healpix,color_range=None)
+iso_map_plot_utils.plot_survey_map(auxDir,mapDir,plotDir,pixel,winList,mask,freqTags,survey_mask_coordinates=survey_mask_coordinates,tessel_healpix=tessel_healpix,color_range=None)
 iso_map_plot_utils.plot_all_windows(auxDir,plotDir,pixel,winList,tessel_healpix=tessel_healpix)
 iso_map_plot_utils.plot_all_maps(auxDir,mapDir,plotDir,pixel,winList,nSplits,color_range=colorRange,survey_mask_coordinates=survey_mask_coordinates,tessel_healpix=tessel_healpix)
 iso_spectra_plot_utils.plot_all_spectra(mcmDir,specDir,plotDir,winList,nSplits,hdf5,type,theoryFile,lmax,compare_mosaic_namaster=compareMosaicNaMaster,white_noise_level=white_noise_level,mcDir=mcDir)
+
+
