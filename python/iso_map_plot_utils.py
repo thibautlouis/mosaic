@@ -236,8 +236,17 @@ def plot_survey_map(auxDir,mapDir,plotDir,pixel,winList,mask,freqTags,color_rang
                 if mask['gal_mask_T']==True:
                     mName=mask['gal_mask_T_%s_%s'%(pixel,f1)]
                     m=hp.read_map(mName)
+                    if mask['point_mask_T']==True:
+                        mName=mask['pts_mask_T_%s_%s'%(pixel,f1)]
+                        m2=hp.read_map(mName)
+                        m*=m2
+                    if mask['missing_pixel_mask_T']==True:
+                        mName=mask['missing_pixel_mask_T_%s_%s'%(pixel,f1)]
+                        m2=hp.read_map(mName)
+                        m*=m2
+
                     m=1-m
-                    T+=m
+                    T+=m    
 
             for i in range(nPatch):
   

@@ -46,44 +46,58 @@ def get_distance(binary,pixel):
     return dist
 
 def apod_C1(binary,radius,pixel):
-    dist=get_distance(binary,pixel)
-
-    if np.max(dist)==0:
-        return (dist*0+1)
-
-    win=dist.copy()
-    id=np.where(dist> radius)
-    win=dist/radius-np.sin(2*np.pi*dist/radius)/(2*np.pi)
-    win[id]=1
     
-    return(win)
+    if radius==0:
+        return binary
+    else:
+        dist=get_distance(binary,pixel)
+
+        if np.max(dist)==0:
+            return (dist*0+1)
+
+        win=dist.copy()
+        id=np.where(dist> radius)
+        win=dist/radius-np.sin(2*np.pi*dist/radius)/(2*np.pi)
+        win[id]=1
+    
+        return(win)
 
 def apod_C2(binary,radius,pixel):
-
-    dist=get_distance(binary,pixel)
     
-    if np.max(dist)==0:
-        return (dist*0+1)
+    if radius==0:
+        return binary
+    else:
 
-    win=dist.copy()
-    id=np.where(dist> radius)
-    win=1./2-1./2*np.cos(-np.pi*dist/radius)
-    win[id]=1
-    return(win)
+        dist=get_distance(binary,pixel)
+    
+        if np.max(dist)==0:
+            return (dist*0+1)
+
+        win=dist.copy()
+        id=np.where(dist> radius)
+        win=1./2-1./2*np.cos(-np.pi*dist/radius)
+        win[id]=1
+        return(win)
 
 
 def apod_C3(binary,radius,pixel):
-    if pixel=='healpix':
-        return 'C3 not available for healpix pixellisation'
     
-    from enlib import enmap
-    from flipper import *
+    if radius==0:
+        return binary
+    else:
 
-    print radius
-    binary_flipper=enmap.to_flipper(binary)
-    win=car_cosine_window(binary_flipper,radius,0)
-    win_enmap=enmap.from_flipper(win)
-    return(win_enmap)
+        if pixel=='healpix':
+            return 'C3 not available for healpix pixellisation'
+            sys.exit()
+    
+        from enlib import enmap
+        from flipper import *
+
+        print radius
+        binary_flipper=enmap.to_flipper(binary)
+        win=car_cosine_window(binary_flipper,radius,0)
+        win_enmap=enmap.from_flipper(win)
+        return(win_enmap)
 
 def car_cosine_window(liteMap,lenApod,pad):
     

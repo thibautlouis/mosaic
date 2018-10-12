@@ -83,7 +83,18 @@ def apply_gal_mask(mask,template,f,pixel,box=None):
     
     return(maskT,maskPol)
 
-
+def apply_missing_pixel_mask(mask,template,f,pixel,box=None):
+    
+    maskT=template.copy()
+    maskPol=template.copy()
+    if mask['missing_pixel_mask_T']==True:
+        mName=mask['missing_pixel_mask_T_%s_%s'%(pixel,f)]
+        maskT=apply_mask(maskT,mName,pixel,box)
+    if mask['missing_pixel_mask_pol']==True:
+        mName=mask['missing_pixel_mask_pol_%s_%s'%(pixel,f)]
+        maskPol=apply_mask(maskPol,mName,pixel,box)
+    
+    return(maskT,maskPol)
 
 
 
@@ -98,12 +109,17 @@ def mask_healpix(auxDir, freqTags, pixel, tessel_healpix, mask, apo_type, apo_ra
     
     ps_maskT={}
     ps_maskPol={}
+    missing_pixel_maskT={}
+    missing_pixel_maskPol={}
     for f in freqTags:
         ps_maskT[f],ps_maskPol[f]=apply_ps_mask(mask,survey_mask,f,pixel)
+        missing_pixel_maskT[f],missing_pixel_maskPol[f]=apply_missing_pixel_mask(mask,survey_mask,f,pixel)
+
         ps_maskT[f]=iso_apodization_utils.create_apodization(ps_maskT[f], pixel, apo_type,apo_radius['ps'])
         ps_maskPol[f]=iso_apodization_utils.create_apodization(ps_maskPol[f], pixel, apo_type,apo_radius['ps'])
-    
-    
+        missing_pixel_maskT[f]=iso_apodization_utils.create_apodization(missing_pixel_maskT[f], pixel, apo_type,apo_radius['miss_pix'])
+        missing_pixel_maskPol[f]=iso_apodization_utils.create_apodization(missing_pixel_maskPol[f], pixel, apo_type,apo_radius['miss_pix'])
+
     win_list = open('%s/window_list.txt'%auxDir,mode="w")
 
     if tessel_healpix['apply']:
@@ -156,6 +172,8 @@ def mask_healpix(auxDir, freqTags, pixel, tessel_healpix, mask, apo_type, apo_ra
 
                     surveymask_T*=ps_maskT[f]
                     surveymask_Pol*=ps_maskPol[f]
+                    surveymask_T*=missing_pixel_maskT[f]
+                    surveymask_Pol*=missing_pixel_maskPol[f]
 
                     if plot:
                         iso_map_utils.plot(surveymask_T,pixel)
