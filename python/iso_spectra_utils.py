@@ -16,7 +16,8 @@ def write_in_hdf5(name,lb,cb_dict):
     spec.create_dataset(name='data',data=array,dtype='float')
 
 
-def get_spectra(mapDir,auxDir,mcmDir,specDir,winList,nSplits,niter,lmax,binningFile,type,hdf5,pixel,survey_mask_coordinates=None,removeMean=None,thetaCut=None):
+def get_spectra(mapDir,auxDir,mcmDir,specDir,winList,nSplits,niter,lmax,binningFile,type, \
+                hdf5,pixel,pixWin,survey_mask_coordinates=None,removeMean=None,thetaCut=None):
 
     if hdf5==True:
         file = h5py.File('%s.hdf5'%(specDir), 'w')
@@ -50,6 +51,10 @@ def get_spectra(mapDir,auxDir,mcmDir,specDir,winList,nSplits,niter,lmax,binningF
                 for s in range(nSplits):
                     fName='split_%d_%s.fits'%(s,f1)
                     map=iso_map_utils.read_map(mapDir,fName,pixel)
+                    
+                    if pixel=='car' and pixWin==True:
+                        from enlib import enmap
+                        map= enmap.apply_window(map, pow=-1.0)
                     
                     if pixel=='car' and survey_mask_coordinates is not None:
                         map=iso_map_utils.cut_patch_car(map,ra0[i],ra1[i],dec0[i],dec1[i])
@@ -132,8 +137,10 @@ def get_spectra(mapDir,auxDir,mcmDir,specDir,winList,nSplits,niter,lmax,binningF
     if hdf5==True:
         file.close()
 
-def get_spectra_namaster(p,mapDir,auxDir,mcmDir,specDir,winList,nSplits,lmax,type,pixel,nlb=None):
+def get_spectra_namaster(p,mapDir,auxDir,mcmDir,specDir,winList,nSplits,lmax,type,pixel,pixWin,nlb=None):
     import pymaster as nmt
+    
+    nside= p['nside']
 
     iso_map_utils.create_directory(specDir)
     
@@ -152,6 +159,10 @@ def get_spectra_namaster(p,mapDir,auxDir,mcmDir,specDir,winList,nSplits,lmax,typ
         cl_coupled=nmt.compute_coupled_cell(f_a,f_b,n_iter=0)
         cl_decoupled=wsp.decouple_cell(cl_coupled)
         return cl_decoupled
+
+
+    if pixWin==True:
+        pw_T,pw_pol=hp.sphtfunc.pixwin(nside, pol=True)
 
     nPatch,freq=iso_window_utils.get_frequency_list(winList)
     
@@ -174,12 +185,19 @@ def get_spectra_namaster(p,mapDir,auxDir,mcmDir,specDir,winList,nSplits,lmax,typ
                 nside=hp.pixelfunc.get_nside(window_T)
                 ell,beam_T=np.loadtxt(p['beam_%s_T'%f1],unpack=True)
                 ell,beam_pol=np.loadtxt(p['beam_%s_Pol'%f1],unpack=True)
+                
+                if pixWin==True:
+                    beam_T=beam_T[:3*nside]*pw_T[:3*nside]
+                    beam_pol=beam_pol[:3*nside]*pw_pol[:3*nside]
+                else:
+                    beam_T=beam_T[:3*nside]
+                    beam_pol=beam_pol[:3*nside]
 
                 for s in range(nSplits):
                     fName='split_%d_%s.fits'%(s,f1)
                     map=iso_map_utils.read_map(mapDir,fName,pixel)
-                    field_0[f1,s]=nmt.NmtField(window_T,[map[0]], beam=beam_T[:3*nside])
-                    field_2[f1,s]=nmt.NmtField(window_pol,[map[1],map[2]], beam=beam_pol[:3*nside])
+                    field_0[f1,s]=nmt.NmtField(window_T,[map[0]], beam=beam_T)
+                    field_2[f1,s]=nmt.NmtField(window_pol,[map[1],map[2]], beam=beam_pol)
                         
             b=nmt.NmtBin(nside,nlb=nlb)
             lb=b.get_effective_ells()

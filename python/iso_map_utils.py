@@ -24,23 +24,23 @@ def add_noise(m,f,s,noise,nsplit,pixel):
         if pixel=='healpix':
             nside=hp.pixelfunc.get_nside(m)
             pixArea= hp.pixelfunc.nside2pixarea(nside)*rad_to_arcmin**2
-            rmsT=rmsT/np.sqrt(pixArea)
-            rmsP=rmsP/np.sqrt(pixArea)
+            rmsT=noise['rms_%s_T'%f]/np.sqrt(pixArea)
+            rmsP=noise['rms_%s_pol'%f]/np.sqrt(pixArea)
 
             size=len(m[0])
-            m_noisy[0]=m[0]+np.random.randn(size)*np.sqrt(nsplit)*noise['rms_%s_T'%f]
-            m_noisy[1]=m[1]+np.random.randn(size)*np.sqrt(nsplit)*noise['rms_%s_pol'%f]
-            m_noisy[2]=m[2]+np.random.randn(size)*np.sqrt(nsplit)*noise['rms_%s_pol'%f]
+            m_noisy[0]=m[0]+np.random.randn(size)*np.sqrt(nsplit)*rmsT
+            m_noisy[1]=m[1]+np.random.randn(size)*np.sqrt(nsplit)*rmsP
+            m_noisy[2]=m[2]+np.random.randn(size)*np.sqrt(nsplit)*rmsP
                 
         if pixel=='car':
             pixArea= m.pixsizemap()*rad_to_arcmin**2
-            rmsT=rmsT/np.sqrt(pixArea)
-            rmsP=rmsP/np.sqrt(pixArea)
+            rmsT=noise['rms_%s_T'%f]/np.sqrt(pixArea)
+            rmsP=noise['rms_%s_pol'%f]/np.sqrt(pixArea)
         
             size=m[0].shape
-            m_noisy[0]=m[0]+np.random.randn(size[0],size[1])*np.sqrt(nsplit)*noise['rms_%s_T'%f]
-            m_noisy[1]=m[1]+np.random.randn(size[0],size[1])*np.sqrt(nsplit)*noise['rms_%s_pol'%f]
-            m_noisy[2]=m[2]+np.random.randn(size[0],size[1])*np.sqrt(nsplit)*noise['rms_%s_pol'%f]
+            m_noisy[0]=m[0]+np.random.randn(size[0],size[1])*np.sqrt(nsplit)*rmsT
+            m_noisy[1]=m[1]+np.random.randn(size[0],size[1])*np.sqrt(nsplit)*rmsP
+            m_noisy[2]=m[2]+np.random.randn(size[0],size[1])*np.sqrt(nsplit)*rmsP
 
     if noise['type']=='inhomogeneous I,Q,U':
         print 'add inhomogeneous noise'
@@ -59,8 +59,6 @@ def add_noise(m,f,s,noise,nsplit,pixel):
             sys.exit()
                         
     return(m_noisy)
-
-
 
 
 def write_map(maps,dir,fName,pixel):

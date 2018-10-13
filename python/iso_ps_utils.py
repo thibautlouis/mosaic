@@ -16,7 +16,12 @@ def read_binning_file(file,lmax):
     binSize=binHi-binLo+1
     return (binLo,binHi,binSize)
 
-def get_window_beam_array(p,f1,f2,lmax):
+def get_window_beam_array(p,f1,f2):
+    
+    lmax=p['lmax']
+    pixel= p['pixelisation']
+    pixWin= p['pixWin']
+    
     W={}
     ell,fell_T_1=np.loadtxt(p['beam_%s_T'%f1],unpack=True)
     ell,fell_Pol_1=np.loadtxt(p['beam_%s_pol'%f1],unpack=True)
@@ -28,6 +33,16 @@ def get_window_beam_array(p,f1,f2,lmax):
     W['PT']=fell_T_2*fell_Pol_1
     W['PP']=fell_Pol_1*fell_Pol_2
     
+    if pixel=='healpix' and pixWin==True:
+        nside=p['nside']
+        pw_T,pw_Pol=hp.sphtfunc.pixwin(nside, pol=True)
+        pw_T,pw_Pol=pw_T[:lmax],pw_Pol[:lmax]
+        
+        W['TT']*=pw_T**2
+        W['TP']*=pw_T*pw_Pol
+        W['PT']*=pw_T*pw_Pol
+        W['PP']*=pw_Pol**2
+
     return( ell,W )
 
 def map2alm(map,pixel,niter,lmax=None,theta_range=None):

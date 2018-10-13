@@ -29,6 +29,7 @@ auxDir = 'auxMaps_%s/'%pixel
 mcmDir = 'mcm_%s/'%pixel
 lmax= p['lmax']
 type=p['type']
+pixWin=p['pixWin']
 
 iso_map_utils.create_directory(mcmDir)
 
@@ -46,7 +47,7 @@ for spec in spectraList[rank::size]:
 
     print spec
     i,f1,f2=spec[0],spec[1],spec[2]
-    ell,Wl_array=iso_ps_utils.get_window_beam_array(p,f1,f2,lmax)
+    ell,Wl_array=iso_ps_utils.get_window_beam_array(p,f1,f2)
     iso_mode_coupling_utils.get_mode_coupling(auxDir,mcmDir,i,f1,f2,Wl_array,binLo,binHi,binSize,lmax,type,pixel)
                 
 

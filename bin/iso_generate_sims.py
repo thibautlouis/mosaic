@@ -54,6 +54,8 @@ freqTags=p['freqTags']
 nSplit= p['nSplit']
 pixel=p['pixelisation']
 noise=p['noise']
+pixWin=p['pixWin']
+
 
 if pixel=='healpix':
     nside= p['nside']
@@ -86,10 +88,19 @@ for iii in xrange(iMin,iMax):
         alm_beamed[2]=hp.sphtfunc.almxfl(alms[2], fl_Pol)
         
         if pixel=='healpix':
+            if pixWin==True:
+                pw_T,pw_Pol=hp.sphtfunc.pixwin(nside, pol=True)
+                alm_beamed[0]=hp.sphtfunc.almxfl(alm_beamed[0], pw_T)
+                alm_beamed[1]=hp.sphtfunc.almxfl(alm_beamed[1], pw_Pol)
+                alm_beamed[2]=hp.sphtfunc.almxfl(alm_beamed[2], pw_Pol)
+
             m=hp.sphtfunc.alm2map(alm_beamed, nside)
+
         if pixel=='car':
             template= enmap.read_map('%s'%p['template'])
             m=curvedsky.alm2map(alm_beamed, template)
+            if pixWin==True:
+                m= enmap.apply_window(m, pow=1.0)
 
         for s in range(nSplit):
             maps=iso_map_utils.add_noise(m,f,s,noise,nSplit,pixel)

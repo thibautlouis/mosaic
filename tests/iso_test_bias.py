@@ -17,15 +17,34 @@ from PIL import Image
 from PIL import ImageFont
 from PIL import ImageDraw
 
-def plot_mc_biais(iStart,iStop,plotDir,name,lb,cb_dict,std_dict,clth,cbth,fields):
+def plot_mc_biais(iStart,iStop,plotDir,name,lb,cb_dict,std_dict,lth,clth,cbth,fields,semilogy_T=False,semilogy_pol=False,cutForPlot=None):
     
+    
+    if cutForPlot is not None:
+        id=np.where(lb<cutForPlot)
+        lth=lth[:cutForPlot]
+        lb=lb[id]
+
+        for l1 in fields:
+            clth[l1]=clth[l1][:cutForPlot]
+            cbth[l1]=cbth[l1][id]
+            cb_dict[l1]=cb_dict[l1][id]
+            std_dict[l1]=std_dict[l1][id]
     count=1
     plt.figure(figsize=(28,12))
     for l1 in fields:
         plt.subplot(3,3,count)
+        if semilogy_T==True and l1=='TT':
+            plt.semilogy()
+        if semilogy_pol==True and l1=='EE':
+            plt.semilogy()
+        if semilogy_pol==True and l1=='BB':
+            plt.semilogy()
+
+        
         plt.errorbar(lth,clth[l1],label='theory',color='grey')
         plt.errorbar(lb,cbth[l1],label='binned theory',color='black')
-        plt.errorbar(lb,cb_dict[l1],std_dict[l1]/np.sqrt(iStop-iStart),fmt='o',label='mean and std')
+        plt.errorbar(lb,cb_dict[l1],std_dict[l1],fmt='o',label='mean and std')
         plt.ylabel(r'$D^{%s}_{\ell}$'%l1,fontsize=18)
         if count>6:
             plt.xlabel(r'$\ell$',fontsize=22)
@@ -75,7 +94,7 @@ iStop=p['iStop']
 mask=p['mask']
 survey_mask_coordinates=p['survey_mask_coordinate']
 tessel_healpix=p['tessel_healpix']
-
+noise=p['noise']
 
 mapDir= 'maps_%s'%pixel
 auxDir = 'auxMaps_%s/'%pixel
@@ -100,6 +119,7 @@ iso_map_utils.create_directory(htmlDir)
 
 winList=auxDir+'window_list.txt'
 iso_map_plot_utils.plot_survey_map(auxDir,mapDir,plotDir,pixel,winList,mask,freqTags,survey_mask_coordinates=survey_mask_coordinates,tessel_healpix=tessel_healpix,color_range=None)
+iso_map_plot_utils.plot_all_windows(auxDir,plotDir,pixel,winList,tessel_healpix=tessel_healpix)
 
 nPatch,freq=iso_window_utils.get_frequency_list(winList)
 
@@ -114,11 +134,13 @@ white_noise_level={}
 for f1 in freqTags:
     for f2 in freqTags:
         if f1==f2:
-            white_noise_level[f1,f2,'noiseInfo']=nSplits,p['rms_%s_T'%f1],p['rms_%s_pol'%f2]
+            white_noise_level[f1,f2,'noiseInfo']=nSplits,noise['rms_%s_T'%f1],noise['rms_%s_pol'%f2]
         else :
             white_noise_level[f1,f2]=0,0
         
         white_noise_level[f1,f2,'beamName']=p['beam_%s_T'%f1],p['beam_%s_pol'%f2]
+
+
 
 for i in range(nPatch):
     patchName='patch_%03d'%i
@@ -147,6 +169,7 @@ for i in range(nPatch):
 
                         
                         if (s1==s2) & (f1==f2):
+                            #print white_noise_level[f1,f2,'noiseInfo'],white_noise_level[f1,f2,'beamName'],fields,lmax,type
                             nlth,label_th=iso_spectra_plot_utils.get_nlth(white_noise_level[f1,f2,'noiseInfo'],white_noise_level[f1,f2,'beamName'],fields,lmax,type)
                             for l1 in fields:
                                 
@@ -159,7 +182,10 @@ for i in range(nPatch):
                         stdName='std_'+ fName
                         lb,std_dict=iso_ps_utils.read_cl_dict(mcDir,patchName,stdName,hdf5,file_mc)
                         name= '%s_%s'%(patchName,meanName)
-                        plot_mc_biais(iStart,iStop,plotDir,name,lb,cb_dict,std_dict,clth,cbth,fields)
+                        if s1==s2:
+                            plot_mc_biais(iStart,iStop,plotDir,name,lb,cb_dict,std_dict,lth,clth,cbth,fields,semilogy_T=True,semilogy_pol=True,cutForPlot=2000)
+                        else:
+                            plot_mc_biais(iStart,iStop,plotDir,name,lb,cb_dict,std_dict,lth,clth,cbth,fields,semilogy_T=False,semilogy_pol=False,cutForPlot=2000)
 
                         count_s2+= 1
                     count_s1+=1
@@ -178,6 +204,7 @@ g.write('<title> Mosaic </title>\n')
 g.write('<script src="multistep2.js"></script>\n')
 g.write('<script> add_step("sub",  ["j","k"]) </script> \n')
 g.write('<script> add_step("all",  ["c","v"]) </script> \n')
+g.write('<script> add_step("diff",  ["a","z"]) </script> \n')
 g.write('</head> \n')
 g.write('<body> \n')
 g.write('<div class=sub> \n')
@@ -199,12 +226,18 @@ for i in range(nPatch):
                 for s2 in range(nSplits):
                     if ((f1==f2) & (count_s2>count_s1)):
                         break
+                    
+                    g.write('<div class=diff> \n')
+
                     fName='patch_%03d_mc_averaged_%s_%sGHzx%sGHz_split%dxsplit%d_binned.png'%(i,type,f1,f2,s1,s2)
                     iso_html_utils.spectra_image(htmlDir,plotDir,fName,i,null=True)
                     g.write('<img src="'+fName+'" width="100%" /> \n')
                     fName='diff_patch_%03d_mc_averaged_%s_%sGHzx%sGHz_split%dxsplit%d_binned.png'%(i,type,f1,f2,s1,s2)
                     iso_html_utils.spectra_image(htmlDir,plotDir,fName,i,null=True)
                     g.write('<img src="'+fName+'" width="100%" /> \n')
+                    
+                    g.write('</div>\n')
+
 
                     count_s2+=1
                 count_s1+=1
@@ -224,12 +257,17 @@ for i in range(nPatch):
                     for s2 in range(nSplits):
                         if ((f1==f2) & (count_s2>count_s1)):
                             break
+                        
+                        g.write('<div class=diff> \n')
+
                         fName='patch_%03d_mc_averaged_%s_%sGHzx%sGHz_split%dxsplit%d_binned.png'%(i,type,f1,f2,s1,s2)
                         iso_html_utils.spectra_image(htmlDir,plotDir,fName,i,null=False)
                         g.write('<img src="'+fName+'" width="100%" /> \n')
                         fName='diff_patch_%03d_mc_averaged_%s_%sGHzx%sGHz_split%dxsplit%d_binned.png'%(i,type,f1,f2,s1,s2)
                         iso_html_utils.spectra_image(htmlDir,plotDir,fName,i,null=False)
                         g.write('<img src="'+fName+'" width="100%" /> \n')
+
+                        g.write('</div>\n')
 
                         count_s2+=1
                     count_s1+=1
