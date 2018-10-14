@@ -15,7 +15,6 @@ def write_in_hdf5(name,lb,cb_dict):
     array=iso_ps_utils.get_cl_array(lb,cb_dict)
     spec.create_dataset(name='data',data=array,dtype='float')
 
-
 def get_spectra(mapDir,auxDir,mcmDir,specDir,winList,nSplits,niter,lmax,binningFile,type, \
                 hdf5,pixel,pixWin,survey_mask_coordinates=None,removeMean=None,thetaCut=None):
 
@@ -51,10 +50,6 @@ def get_spectra(mapDir,auxDir,mcmDir,specDir,winList,nSplits,niter,lmax,binningF
                 for s in range(nSplits):
                     fName='split_%d_%s.fits'%(s,f1)
                     map=iso_map_utils.read_map(mapDir,fName,pixel)
-                    
-                    if pixel=='car' and pixWin==True:
-                        from enlib import enmap
-                        map= enmap.apply_window(map, pow=-1.0)
                     
                     if pixel=='car' and survey_mask_coordinates is not None:
                         map=iso_map_utils.cut_patch_car(map,ra0[i],ra1[i],dec0[i],dec1[i])

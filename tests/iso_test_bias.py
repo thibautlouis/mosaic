@@ -19,17 +19,24 @@ from PIL import ImageDraw
 
 def plot_mc_biais(iStart,iStop,plotDir,name,lb,cb_dict,std_dict,lth,clth,cbth,fields,semilogy_T=False,semilogy_pol=False,cutForPlot=None):
     
-    
-    if cutForPlot is not None:
-        id=np.where(lb<cutForPlot)
-        lth=lth[:cutForPlot]
-        lb=lb[id]
+    lth_field={}
+    lb_field={}
 
+    if cutForPlot is not None:
         for l1 in fields:
-            clth[l1]=clth[l1][:cutForPlot]
+            id=np.where(lb<cutForPlot[l1])
+            lb_field[l1]=lb[id]
+            lth_field[l1]=lth[:cutForPlot[l1]]
+            clth[l1]=clth[l1][:cutForPlot[l1]]
             cbth[l1]=cbth[l1][id]
             cb_dict[l1]=cb_dict[l1][id]
             std_dict[l1]=std_dict[l1][id]
+    else:
+        for l1 in fields:
+            lth_field[l1]=lth
+            lb_field[l1]=lb
+
+
     count=1
     plt.figure(figsize=(28,12))
     for l1 in fields:
@@ -42,9 +49,9 @@ def plot_mc_biais(iStart,iStop,plotDir,name,lb,cb_dict,std_dict,lth,clth,cbth,fi
             plt.semilogy()
 
         
-        plt.errorbar(lth,clth[l1],label='theory',color='grey')
-        plt.errorbar(lb,cbth[l1],label='binned theory',color='black')
-        plt.errorbar(lb,cb_dict[l1],std_dict[l1],fmt='o',label='mean and std')
+        plt.errorbar(lth_field[l1],clth[l1],label='theory',color='grey')
+        plt.errorbar(lb_field[l1],cbth[l1],label='binned theory',color='black')
+        plt.errorbar(lb_field[l1],cb_dict[l1],std_dict[l1],fmt='o',label='mean and std')
         plt.ylabel(r'$D^{%s}_{\ell}$'%l1,fontsize=18)
         if count>6:
             plt.xlabel(r'$\ell$',fontsize=22)
@@ -60,8 +67,8 @@ def plot_mc_biais(iStart,iStop,plotDir,name,lb,cb_dict,std_dict,lth,clth,cbth,fi
 
     for l1 in fields:
         plt.subplot(3,3,count)
-        plt.errorbar(lb,cb_dict[l1]-cbth[l1],std_dict[l1]/np.sqrt(iStop-iStart),fmt='o')
-        plt.errorbar(lb,cbth[l1]*0,color='black')
+        plt.errorbar(lb_field[l1],cb_dict[l1]-cbth[l1],std_dict[l1]/np.sqrt(iStop-iStart),fmt='o')
+        plt.errorbar(lb_field[l1],cbth[l1]*0,color='black')
         plt.ylabel(r'$D^{%s, \rm{mean}}_{\ell}- D^{%s, \rm{th}}_{\ell}$'%(l1,l1),fontsize=18)
         if count>6:
             plt.xlabel(r'$\ell$',fontsize=22)
@@ -118,8 +125,8 @@ iso_map_utils.create_directory(htmlDir)
 
 
 winList=auxDir+'window_list.txt'
-iso_map_plot_utils.plot_survey_map(auxDir,mapDir,plotDir,pixel,winList,mask,freqTags,survey_mask_coordinates=survey_mask_coordinates,tessel_healpix=tessel_healpix,color_range=None)
-iso_map_plot_utils.plot_all_windows(auxDir,plotDir,pixel,winList,tessel_healpix=tessel_healpix)
+#iso_map_plot_utils.plot_survey_map(auxDir,mapDir,plotDir,pixel,winList,mask,freqTags,survey_mask_coordinates=survey_mask_coordinates,tessel_healpix=tessel_healpix,color_range=None)
+#iso_map_plot_utils.plot_all_windows(auxDir,plotDir,pixel,winList,tessel_healpix=tessel_healpix)
 
 nPatch,freq=iso_window_utils.get_frequency_list(winList)
 
@@ -140,6 +147,16 @@ for f1 in freqTags:
         
         white_noise_level[f1,f2,'beamName']=p['beam_%s_T'%f1],p['beam_%s_pol'%f2]
 
+cutForPlot={}
+cutForPlot['TT']=2000
+cutForPlot['EE']=1400
+cutForPlot['TE']=1500
+cutForPlot['ET']=1500
+cutForPlot['BB']=1400
+cutForPlot['EB']=1400
+cutForPlot['BE']=1400
+cutForPlot['BT']=1400
+cutForPlot['TB']=1400
 
 
 for i in range(nPatch):
@@ -183,9 +200,9 @@ for i in range(nPatch):
                         lb,std_dict=iso_ps_utils.read_cl_dict(mcDir,patchName,stdName,hdf5,file_mc)
                         name= '%s_%s'%(patchName,meanName)
                         if s1==s2:
-                            plot_mc_biais(iStart,iStop,plotDir,name,lb,cb_dict,std_dict,lth,clth,cbth,fields,semilogy_T=True,semilogy_pol=True,cutForPlot=2000)
+                            plot_mc_biais(iStart,iStop,plotDir,name,lb,cb_dict,std_dict,lth,clth,cbth,fields,semilogy_T=True,semilogy_pol=True,cutForPlot=cutForPlot)
                         else:
-                            plot_mc_biais(iStart,iStop,plotDir,name,lb,cb_dict,std_dict,lth,clth,cbth,fields,semilogy_T=False,semilogy_pol=False,cutForPlot=2000)
+                            plot_mc_biais(iStart,iStop,plotDir,name,lb,cb_dict,std_dict,lth,clth,cbth,fields,semilogy_T=False,semilogy_pol=False,cutForPlot=cutForPlot)
 
                         count_s2+= 1
                     count_s1+=1

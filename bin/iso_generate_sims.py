@@ -104,6 +104,9 @@ for iii in xrange(iMin,iMax):
 
         for s in range(nSplit):
             maps=iso_map_utils.add_noise(m,f,s,noise,nSplit,pixel)
+            if pixel=='car' and pixWin==True:
+                maps= enmap.apply_window(maps, pow=-1.0)
+
             
             fName='split_%d_%s.fits'%(s,f)
             
