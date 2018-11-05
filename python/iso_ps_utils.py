@@ -4,6 +4,7 @@ import healpy as hp
 import numpy as np
 import pylab as plt
 import os
+from pixell import curvedsky
 
 def read_binning_file(file,lmax):
     binLo,binHi,binC = plt.loadtxt(file,unpack=True)
@@ -55,7 +56,6 @@ def map2alm(map,pixel,niter,lmax=None,theta_range=None):
         if theta_range is None:
             alm= hp.sphtfunc.map2alm(map,iter=niter)
         else:
-            from enlib import curvedsky
             nside=hp.pixelfunc.get_nside(map)
             alm= curvedsky.map2alm_healpix(map,lmax=3*nside-1,theta_min=theta_range[0], theta_max=theta_range[1])
             if iter !=0:
@@ -66,7 +66,6 @@ def map2alm(map,pixel,niter,lmax=None,theta_range=None):
         return alm
 
     if pixel=='car':
-        from enlib import curvedsky
         alm = curvedsky.map2alm(map,lmax= lmax)
         if iter !=0:
             map_copy=map.copy()
@@ -178,6 +177,8 @@ def mcm_inv_mult(mcm_array,vec,direct_invert=True):
     nb_all=len(vec)
     new_vec=np.zeros(nb_all)
     nb=nb_all/9
+    
+
     if direct_invert==True:
         vec[:nb]=np.dot(np.linalg.inv(mcm_array[:nb,:nb]),vec[:nb])
         vec[nb:5*nb]=np.dot(np.linalg.inv(mcm_array[nb:5*nb,nb:5*nb]),vec[nb:5*nb])

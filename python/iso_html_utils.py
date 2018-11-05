@@ -45,7 +45,7 @@ def spectra_image(htmlDir,plotDir,fName,i,null=False):
         full_im.save(os.path.expanduser('%s/%s'%(htmlDir,fName)))
 
 
-def make_html_healpix(htmlDir,plotDir,freqTags,winList,nSplits,type):
+def make_html_healpix(htmlDir,plotDir,freqTags,winList,nSplits,type,plot_all=False):
     
     path=(os.path.dirname(os.path.realpath(__file__)))
     os.system('cp %s/../data/multistep2.js ./%s/multistep2.js'%(path,htmlDir))
@@ -63,13 +63,14 @@ def make_html_healpix(htmlDir,plotDir,freqTags,winList,nSplits,type):
     g.write('<div class=sub> \n')
 
     nPatch,freq=iso_window_utils.get_frequency_list(winList)
-    
+    fields=['TT','EE','BB','TE','EB','TB','ET','BE','BT']
+
     for i in range(nPatch):
         
         patchName='patch_%03d'%i
         
         g.write('<div class=all>\n')
-
+        
         count1=0
         for f1 in freqTags:
             full_im = Image.new("RGB", im_size_healpix,color='white')
@@ -88,41 +89,52 @@ def make_html_healpix(htmlDir,plotDir,freqTags,winList,nSplits,type):
             str='image_%03d_%s.png'%(i,f1)
             full_im.save(os.path.expanduser('%s/%s'%(htmlDir,str)))
             g.write('<img src="'+str+'" width="100%" /> \n')
-            
-        count1=0
-        for f1 in freqTags:
-            count2=0
-            for f2 in freqTags:
-                if count2>count1:
-                    continue
-                count_s1=0
-                for s1 in range(nSplits):
-                    count_s2=0
-                    for s2 in range(nSplits):
-                        if ((f1==f2) & (count_s2>count_s1)):
-                            break
-                        fName='patch_%03d_%s_%sGHzx%sGHz_split%dxsplit%d_binned.png'%(i,type,f1,f2,s1,s2)
-                        spectra_image(htmlDir,plotDir,fName,i,null=True)
-                        g.write('<img src="'+fName+'" width="100%" /> \n')
+        
+        if plot_all==True:
 
-                        count_s2+=1
-                    count_s1+=1
+            count1=0
+            for f1 in freqTags:
+                count2=0
+                for f2 in freqTags:
+                    if count2>count1:
+                        continue
+                    count_s1=0
+                    for s1 in range(nSplits):
+                        count_s2=0
+                        for s2 in range(nSplits):
+                            if ((f1==f2) & (count_s2>count_s1)):
+                                break
                         
-                fName='patch_%03d_%s_%sGHzx%sGHz_mean_auto_binned.png'%(i,type,f1,f2)
+                            if count_s1==count_s2 and f1==f2:
+                                print 'auto'
+                            else:
+                                fName='patch_%03d_%s_%sGHzx%sGHz_split%dxsplit%d_binned.png'%(i,type,f1,f2,s1,s2)
+                                spectra_image(htmlDir,plotDir,fName,i,null=True)
+                                g.write('<img src="'+fName+'" width="100%" /> \n')
+
+                            count_s2+=1
+                        count_s1+=1
+                        
+                    fName='patch_%03d_%s_%sGHzx%sGHz_mean_auto_binned.png'%(i,type,f1,f2)
+                    spectra_image(htmlDir,plotDir,fName,i,null=True)
+                    g.write('<img src="'+fName+'" width="100%" /> \n')
+
+                    fName='patch_%03d_%s_%sGHzx%sGHz_mean_cross_binned.png'%(i,type,f1,f2)
+                    spectra_image(htmlDir,plotDir,fName,i,null=True)
+                    g.write('<img src="'+fName+'" width="100%" /> \n')
+
+                    fName='patch_%03d_%s_%sGHzx%sGHz_mean_noise_binned.png'%(i,type,f1,f2)
+                    spectra_image(htmlDir,plotDir,fName,i,null=True)
+                    g.write('<img src="'+fName+'" width="100%" /> \n')
+
+
+                    count2+=1
+                count1+=1
+        else:
+            for l1 in fields:
+                fName='patch_%03d_%s.png'%(i,l1)
                 spectra_image(htmlDir,plotDir,fName,i,null=True)
                 g.write('<img src="'+fName+'" width="100%" /> \n')
-
-                fName='patch_%03d_%s_%sGHzx%sGHz_mean_cross_binned.png'%(i,type,f1,f2)
-                spectra_image(htmlDir,plotDir,fName,i,null=True)
-                g.write('<img src="'+fName+'" width="100%" /> \n')
-
-                fName='patch_%03d_%s_%sGHzx%sGHz_mean_noise_binned.png'%(i,type,f1,f2)
-                spectra_image(htmlDir,plotDir,fName,i,null=True)
-                g.write('<img src="'+fName+'" width="100%" /> \n')
-
-
-                count2+=1
-            count1+=1
 
         if len(freq[i]) !=0:
             
@@ -167,35 +179,45 @@ def make_html_healpix(htmlDir,plotDir,freqTags,winList,nSplits,type):
                 str='image_%03d_%s.png'%(i,f1)
                 full_im.save(os.path.expanduser('%s/%s'%(htmlDir,str)))
         
-            count1=0
-            for f1 in freq[i]:
-                count2=0
-                for f2 in freq[i]:
-                    if count2>count1:
-                        continue
-                    count_s1=0
-                    for s1 in range(nSplits):
-                        count_s2=0
-                        for s2 in range(nSplits):
-                            if ((f1==f2) & (count_s2>count_s1)):
-                                break
-                            fName='patch_%03d_%s_%sGHzx%sGHz_split%dxsplit%d_binned.png'%(i,type,f1,f2,s1,s2)
-                            spectra_image(htmlDir,plotDir,fName,i)
+            if plot_all==True:
+                count1=0
+                for f1 in freq[i]:
+                    count2=0
+                    for f2 in freq[i]:
+                        if count2>count1:
+                            continue
+                        count_s1=0
+                        for s1 in range(nSplits):
+                            count_s2=0
+                            for s2 in range(nSplits):
+                                if ((f1==f2) & (count_s2>count_s1)):
+                                    break
+                            
+                                if count_s1==count_s2 and f1==f2:
+                                    print 'auto'
+                                else:
+                                    fName='patch_%03d_%s_%sGHzx%sGHz_split%dxsplit%d_binned.png'%(i,type,f1,f2,s1,s2)
+                                    spectra_image(htmlDir,plotDir,fName,i)
 
-                            count_s2+=1
-                        count_s1+=1
+                                count_s2+=1
+                            count_s1+=1
                                                             
-                    fName='patch_%03d_%s_%sGHzx%sGHz_mean_auto_binned.png'%(i,type,f1,f2)
-                    spectra_image(htmlDir,plotDir,fName,i)
+                        fName='patch_%03d_%s_%sGHzx%sGHz_mean_auto_binned.png'%(i,type,f1,f2)
+                        spectra_image(htmlDir,plotDir,fName,i)
                         
-                    fName='patch_%03d_%s_%sGHzx%sGHz_mean_cross_binned.png'%(i,type,f1,f2)
-                    spectra_image(htmlDir,plotDir,fName,i)
+                        fName='patch_%03d_%s_%sGHzx%sGHz_mean_cross_binned.png'%(i,type,f1,f2)
+                        spectra_image(htmlDir,plotDir,fName,i)
                         
-                    fName='patch_%03d_%s_%sGHzx%sGHz_mean_noise_binned.png'%(i,type,f1,f2)
-                    spectra_image(htmlDir,plotDir,fName,i)
+                        fName='patch_%03d_%s_%sGHzx%sGHz_mean_noise_binned.png'%(i,type,f1,f2)
+                        spectra_image(htmlDir,plotDir,fName,i)
                     
-                    count2+=1
-                count1+=1
+                        count2+=1
+                    count1+=1
+            else:
+                for l1 in fields:
+                    fName='patch_%03d_%s.png'%(i,l1)
+                    spectra_image(htmlDir,plotDir,fName,i)
+                    g.write('<img src="'+fName+'" width="100%" /> \n')
 
         g.write('</div>\n')
         

@@ -47,6 +47,8 @@ colorRange=p['colorRange']
 naMaster=p['useNaMaster']
 mask=p['mask']
 noise=p['noise']
+cutForPlot=p['cutForPlot']
+yrange_all=p['yrange_all']
 
 mapDir= 'maps_%s/'%pixel
 auxDir = 'auxMaps_%s/'%pixel
@@ -90,6 +92,7 @@ if p['useMcErrors'] ==False:
 iso_map_plot_utils.plot_survey_map(auxDir,mapDir,plotDir,pixel,winList,mask,freqTags,survey_mask_coordinates=survey_mask_coordinates,tessel_healpix=tessel_healpix,color_range=None)
 iso_map_plot_utils.plot_all_windows(auxDir,plotDir,pixel,winList,tessel_healpix=tessel_healpix)
 iso_map_plot_utils.plot_all_maps(auxDir,mapDir,plotDir,pixel,winList,nSplits,color_range=colorRange,survey_mask_coordinates=survey_mask_coordinates,tessel_healpix=tessel_healpix)
-iso_spectra_plot_utils.plot_all_spectra(mcmDir,specDir,plotDir,winList,nSplits,hdf5,type,theoryFile,lmax,compare_mosaic_namaster=compareMosaicNaMaster,white_noise_level=white_noise_level,mcDir=mcDir)
+iso_spectra_plot_utils.plot_all_spectra(mcmDir,specDir,plotDir,winList,nSplits,hdf5,type,theoryFile,lmax \
+                                        ,compare_mosaic_namaster=compareMosaicNaMaster,white_noise_level=white_noise_level,mcDir=mcDir,cutForPlot=cutForPlot,yrange_all=yrange_all)
 
 

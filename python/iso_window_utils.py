@@ -6,6 +6,8 @@ import pylab as plt
 import iso_map_utils
 import iso_apodization_utils
 import os
+from pixell import enmap
+
 
 def get_frequency_list(win_list):
     winList=np.genfromtxt(win_list,unpack=True,dtype='str')
@@ -50,7 +52,6 @@ def apply_mask(map,mName,pixel,box):
         if mask_nside != nside:
             raise ValueError, "mask nside and map nside disagree"
     if pixel=='car':
-        from enlib import enmap
         m=enmap.read_map(mName)
         if box is not None:
             m=m.submap(box)
@@ -220,7 +221,6 @@ def mask_healpix(auxDir, freqTags, pixel, tessel_healpix, mask, apo_type, apo_ra
     win_list.close()
 
 def rectangle_mask_car(auxDir, freqTags, pixel, survey_mask_coordinate, mask, apo_type, apo_radius, template, plot=False):
-    from enlib import enmap
     
     ra0,ra1,dec0,dec1=np.loadtxt(survey_mask_coordinate,unpack=True, usecols=range(1,5),ndmin=2)
     nPatch=len(ra0)

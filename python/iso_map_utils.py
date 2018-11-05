@@ -6,6 +6,8 @@ import pylab as plt
 import os
 import matplotlib.style
 import matplotlib as mpl
+from enlib import enmap
+
 mpl.style.use('classic')
 
 def create_directory(dirName):
@@ -65,7 +67,6 @@ def write_map(maps,dir,fName,pixel):
     if pixel=='healpix':
         hp.fitsfunc.write_map(dir+fName, maps,overwrite=True)
     if pixel=='car':
-        from enlib import enmap
         enmap.write_map(dir+fName, maps)
 
 def read_map(dir,fName,pixel):
@@ -75,7 +76,6 @@ def read_map(dir,fName,pixel):
         except IndexError:
             m=hp.fitsfunc.read_map(dir+fName,field=0,verbose=False)
     if pixel=='car':
-        from enlib import enmap
         m=enmap.read_map(dir+fName)
     return m
 

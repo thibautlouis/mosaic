@@ -9,6 +9,7 @@ import iso_dict
 import sys
 from mpi4py import MPI
 import pylab as plt
+from pixell import enmap
 
 p = iso_dict.flipperDict()
 p.read_from_file(sys.argv[1])
@@ -27,7 +28,6 @@ for freq in freqTags:
         m=iso_map_utils.read_map(dataDir,m,pixel)
         
         if pixel=='car' and pixWin==True:
-            from enlib import enmap
             m= enmap.apply_window(m, pow=-1.0)
 
         fName='split_%d_%s.fits'%(count,freq)

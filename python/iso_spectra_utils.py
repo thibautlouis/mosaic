@@ -88,6 +88,8 @@ def get_spectra(mapDir,auxDir,mcmDir,specDir,winList,nSplits,niter,lmax,binningF
                         
                             l,cl_dict=iso_ps_utils.get_cl_dict(alms[f1,s1],alms[f2,s2])
                             lb,cb_dict=iso_ps_utils.bin_cl_dict(l,cl_dict,binningFile,lmax,type=type)
+                            
+                            
 
                             cb_dict=iso_ps_utils.apply_mcm(cb_dict,mcm,direct_invert=True)
                         
@@ -179,7 +181,7 @@ def get_spectra_namaster(p,mapDir,auxDir,mcmDir,specDir,winList,nSplits,lmax,typ
                 
                 nside=hp.pixelfunc.get_nside(window_T)
                 ell,beam_T=np.loadtxt(p['beam_%s_T'%f1],unpack=True)
-                ell,beam_pol=np.loadtxt(p['beam_%s_Pol'%f1],unpack=True)
+                ell,beam_pol=np.loadtxt(p['beam_%s_pol'%f1],unpack=True)
                 
                 if pixWin==True:
                     beam_T=beam_T[:3*nside]*pw_T[:3*nside]

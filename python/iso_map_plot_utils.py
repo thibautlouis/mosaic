@@ -9,7 +9,7 @@ import iso_ps_utils
 import os
 import sys
 import h5py
-
+from pixell import enmap,enplot
 
 #This plotting routine need serious rewriting, it's pretty ugly
 
@@ -121,7 +121,6 @@ def plot_maps(maps,pixel,mask=0,color='planck',color_range=None,png_file=None,gn
                     else:
                         plt.show()
     if pixel=='car':
-        from enlib import enplot
     
         if maps.ndim==2:
             plots = enplot.get_plots(maps,mask=mask,color=color)
@@ -198,7 +197,9 @@ def plot_all_maps(auxDir,mapDir,plotDir,pixel,winList,nSplits,color_range=None,s
                 if pixel=='car':
                     maps=iso_map_utils.cut_patch_car(maps,ra0[i],ra1[i],dec0[i],dec1[i])
                 for ii in range(3):
+                    id=np.where(window[ii]==0)
                     maps[ii]*=window[ii]
+                    maps[ii][id]=np.nan
                 gnomview_coord=None
                 if pixel=='healpix':
 
@@ -208,7 +209,6 @@ def plot_all_maps(auxDir,mapDir,plotDir,pixel,winList,nSplits,color_range=None,s
 
 def plot_survey_map(auxDir,mapDir,plotDir,pixel,winList,mask,freqTags,color_range=None,survey_mask_coordinates=None,tessel_healpix=None):
     if pixel=='car':
-        from enlib import enmap,enplot
         ra0,ra1,dec0,dec1=np.loadtxt(survey_mask_coordinates,unpack=True, usecols=range(1,5),ndmin=2)
         nPatch,freq=iso_window_utils.get_frequency_list(winList)
         for i in range(nPatch):

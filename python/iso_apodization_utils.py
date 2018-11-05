@@ -6,6 +6,7 @@ import pylab as plt
 import iso_map_utils
 import os
 import scipy.ndimage
+from pixell import enmap
 
 def get_distance(binary,pixel):
     
@@ -36,7 +37,6 @@ def get_distance(binary,pixel):
         dist*=180/np.pi
 
     if pixel=='car':
-        from enlib import enmap
         pixSize_arcmin= np.sqrt(binary.pixsize()*(60*180/np.pi)**2)
         print 'pixSize= %0.2f'%pixSize_arcmin
         dist= scipy.ndimage.distance_transform_edt(binary)
@@ -90,7 +90,6 @@ def apod_C3(binary,radius,pixel):
             return 'C3 not available for healpix pixellisation'
             sys.exit()
     
-        from enlib import enmap
         from flipper import *
 
         print radius

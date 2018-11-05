@@ -25,6 +25,7 @@ import iso_dict
 import sys
 from mpi4py import MPI
 import pylab as plt
+from pixell import enmap,powspec,curvedsky,enplot
 
 p = iso_dict.flipperDict()
 p.read_from_file(sys.argv[1])
@@ -62,7 +63,6 @@ if pixel=='healpix':
     pixArea= hp.pixelfunc.nside2pixarea(nside,degrees=True)
     lth, cl_th = iso_ps_utils.read_clth_file(clfile,type='Cl')
 if pixel=='car':
-    from enlib import enmap,powspec,curvedsky,enplot
     ncomp=3
     ps=powspec.read_spectrum(clfile)[:ncomp,:ncomp]
 
@@ -103,6 +103,7 @@ for iii in xrange(iMin,iMax):
                 m= enmap.apply_window(m, pow=1.0)
 
         for s in range(nSplit):
+            
             maps=iso_map_utils.add_noise(m,f,s,noise,nSplit,pixel)
             if pixel=='car' and pixWin==True:
                 maps= enmap.apply_window(maps, pow=-1.0)
