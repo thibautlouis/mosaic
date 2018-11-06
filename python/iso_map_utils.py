@@ -6,7 +6,7 @@ import pylab as plt
 import os
 import matplotlib.style
 import matplotlib as mpl
-from enlib import enmap
+from pixell import enmap
 
 mpl.style.use('classic')
 

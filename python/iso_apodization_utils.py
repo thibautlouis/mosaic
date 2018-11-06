@@ -85,31 +85,28 @@ def apod_C3(binary,radius,pixel):
     if radius==0:
         return binary
     else:
-
         if pixel=='healpix':
             return 'C3 not available for healpix pixellisation'
             sys.exit()
-    
-        from flipper import *
 
         print radius
-        binary_flipper=enmap.to_flipper(binary)
-        win=car_cosine_window(binary_flipper,radius,0)
-        win_enmap=enmap.from_flipper(win)
-        return(win_enmap)
+        win=car_cosine_window(binary,radius,0)
+        return(win)
 
-def car_cosine_window(liteMap,lenApod,pad):
+def car_cosine_window(binary,lenApod,pad):
     
-    Nx=liteMap.Nx
-    Ny=liteMap.Ny
-    win=liteMap.copy()
-    win.data[:]=1
+    shape= binary.shape
+    wcs= binary.wcs
+    Ny,Nx=shape
+    pixScaleY,pixScaleX= enmap.pixshape(shape, wcs)
+    win=binary.copy()
+    win=win*0+1
     winX=win.copy()
     winY=win.copy()
     Id=np.ones((Ny,Nx))
     
-    degToPix_x=np.pi/180/liteMap.pixScaleX
-    degToPix_y=np.pi/180/liteMap.pixScaleY
+    degToPix_x=np.pi/180/pixScaleX
+    degToPix_y=np.pi/180/pixScaleY
     
     lenApod_x=int(lenApod*degToPix_x)
     lenApod_y=int(lenApod*degToPix_y)
@@ -118,15 +115,15 @@ def car_cosine_window(liteMap,lenApod,pad):
     
     for i in range(pad_x,lenApod_x+pad_x):
         r=float(i)-pad_x
-        winX.data[:,i]=1./2*(Id[:,i]-np.cos(-np.pi*r/lenApod_x))
-        winX.data[:,Nx-i-1]=winX.data[:,i]
+        winX[:,i]=1./2*(Id[:,i]-np.cos(-np.pi*r/lenApod_x))
+        winX[:,Nx-i-1]=winX[:,i]
     for j in range(pad_y,lenApod_y+pad_y):
         r=float(j)-pad_y
-        winY.data[j,:]=1./2*(Id[j,:]-np.cos(-np.pi*r/lenApod_y))
-        winY.data[Ny-j-1,:]=winY.data[j,:]
+        winY[j,:]=1./2*(Id[j,:]-np.cos(-np.pi*r/lenApod_y))
+        winY[Ny-j-1,:]=winY[j,:]
     
-    win.data[:]=0
-    win.data[pad_y:Ny-pad_y,pad_x:Nx-pad_x]+=winX.data[pad_y:Ny-pad_y,pad_x:Nx-pad_x]*winY.data[pad_y:Ny-pad_y,pad_x:Nx-pad_x]
+    win[:]=0
+    win[pad_y:Ny-pad_y,pad_x:Nx-pad_x]+=winX[pad_y:Ny-pad_y,pad_x:Nx-pad_x]*winY[pad_y:Ny-pad_y,pad_x:Nx-pad_x]
     return(win)
 
 
